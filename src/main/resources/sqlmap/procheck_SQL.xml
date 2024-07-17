@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.ProCheckMapper">
+
+	
+	<resultMap type="kr.or.ddit.vo.ProfessorVO" id="professorMap">
+		<result property="proNo" column="PRO_NO"/>
+		<result property="proAddr" column="PRO_ADDR"/>
+		<result property="empDate" column="EMP_DATE"/>
+		<result property="salary" column="SALARY"/>
+		<result property="deptCode" column="DEPT_CODE"/>
+		<result property="proStudy" column="PRO_STUDY"/>
+		<result property="proAddrDet" column="PRO_ADDR_DET"/>
+		<result property="proPostno" column="PRO_POSTNO"/>
+		<result property="proWorkYn" column="PRO_WORK_YN"/>
+		<result property="proRetireDate" column="PRO_RETIRE_DATE"/>
+		<result property="proPosition" column="PRO_POSITION"/>
+		<result property="comAttMId" column="COM_ATT_M_ID"/>
+		<result property="proEmail" column="PRO_EMAIL"/>
+		<association property="userInfoVO" resultMap="userInfoVOMap"></association>
+		<association property="comAttachDetVO" resultMap="comAttachDetVO"></association>
+		<association property="comDetCodeVO" resultMap="comDetCodeVOMap"></association>
+	</resultMap>
+	
+	<resultMap type="kr.or.ddit.vo.UserInfoVO" id="userInfoVOMap">
+		<result property="userNo" column="USER_NO"/>
+		<result property="userName" column="USER_NAME"/>
+		<result property="userPass" column="USER_PASS"/>
+		<result property="userTel" column="USER_TEL"/>
+		<result property="userGubun" column="USER_GUBUN"/>
+		<result property="userBirth" column="USER_BIRTH"/>
+		<result property="enabled" column="ENABLED"/>
+	</resultMap>
+	
+	<resultMap type="kr.or.ddit.vo.ComDetCodeVO" id="comDetCodeVOMap">
+		<result property="comDetCode" column="COM_DET_CODE"/>
+		<result property="comDetCodeName" column="COM_DET_CODE_NAME"/>
+		<result property="comDetUseYn" column="COM_DET_USE_YN"/>
+		<result property="comCode" column="COM_CODE"/>
+	</resultMap>
+	
+	<resultMap type="kr.or.ddit.vo.ComAttachDetVO" id="comAttachDetVO">
+		<result property="comAttDetNo" column="COM_ATT_DET_NO"/>
+		<result property="comAttMId" column="COM_ATT_M_ID"/>
+		<result property="logiFileName" column="LOGI_FILE_NAME"/>
+		<result property="phyFileName" column="PHY_FILE_NAME"/>
+		<result property="phySaveRoute" column="PHY_SAVE_ROUTE"/>
+		<result property="phyRegDate" column="PHY_REG_DATE"/>
+		<result property="comAttDetSize" column="COM_ATT_DET_SIZE"/>
+		<result property="comAttDetType" column="COM_ATT_DET_TYPE"/>
+		<result property="comAttDetDelYn" column="COM_ATT_DET_DEL_YN"/>
+	</resultMap>
+	
+	<select id="searchList" parameterType="hashMap" resultMap="professorMap">
+			SELECT
+			    A.pro_no,
+			    A.pro_addr,
+			    A.emp_date,
+			    A.salary,
+			    A.dept_code,
+			    A.pro_study,
+			    A.pro_addr_det,
+			    A.pro_postno,
+			    A.pro_work_yn,
+			    A.pro_retire_date,
+			    A.pro_position,
+			    A.com_att_m_id,
+			    A.pro_email,
+			    B.user_name,
+			    B.user_pass,
+			    B.user_tel,
+			    B.user_gubun,
+			    B.enabled,
+			    C.com_det_code,
+			    C.com_det_code_name,
+			    C.com_det_use_yn,
+			    C.com_code,
+			    D.PHY_FILE_NAME,
+			    D.COM_ATT_DET_TYPE,
+			    D.PHY_SAVE_ROUTE
+			FROM 
+			    professor A, user_info B, com_det_code C, COM_ATTACH_DET D
+			    WHERE A.pro_no = B.user_no
+			    AND A.dept_code = C.com_det_code
+			    AND A.com_att_m_id = D.com_att_m_id(+)
+				AND A.dept_code = #{searchCnd}
+	</select>	
+	
+	<select id="profDetail" parameterType="hashMap" resultMap="professorMap">
+			SELECT
+			    A.pro_no,
+			    A.pro_addr,
+			    TO_CHAR(A.emp_date, 'YYYY-MM-DD') AS emp_date,
+			    A.salary,
+			    A.dept_code,
+			    A.pro_study,
+			    A.pro_addr_det,
+			    A.pro_postno,
+			    A.pro_work_yn,
+			    TO_CHAR(A.pro_retire_date, 'YYYY-MM-DD') AS  pro_retire_date,
+			    A.pro_position,
+			    A.com_att_m_id,
+			    A.pro_email,
+			    B.user_no,
+			    B.user_name,
+			    B.user_pass,
+			    B.user_tel,
+			    B.user_gubun,
+			    TO_CHAR(B.user_birth, 'YYYY-MM-DD') AS user_birth,
+			    B.enabled,
+			    C.com_det_code,
+			    C.com_det_code_name,
+			    C.com_det_use_yn,
+			    C.com_code,
+			    D.PHY_FILE_NAME,
+			    D.COM_ATT_DET_TYPE,
+			    D.PHY_SAVE_ROUTE
+			FROM 
+			    professor A, user_info B, com_det_code C, COM_ATTACH_DET D
+			    WHERE A.pro_no = B.user_no
+			    AND A.dept_code = C.com_det_code
+			    AND A.com_att_m_id = D.com_att_m_id(+)
+			    AND a.pro_no = #{proNo}
+	</select>
+	<select id="getUserNo" parameterType="String" resultType="String">
+<!-- 		SELECT SUBSTR(MAX(user_no), 1, 1) || TRIM(TO_CHAR(SUBSTR(MAX(user_no), 2) + 1, '000')) -->
+<!-- 				FROM user_info -->
+<!-- 			where user_gubun = '02' -->
+			
+		SELECT #{frontId} || LPAD(TO_CHAR(TO_NUMBER(SUBSTR(MAX(user_no), 2)) + 1), 3, '0')
+		FROM user_info
+		WHERE user_gubun = '02'
+	</select>
+
+    <!-- 1) 교수 정보 등록  ProfessorVO.userInfoVO -->
+    <insert id="userInfoAdd" parameterType="kr.or.ddit.vo.UserInfoVO">
+        
+        INSERT INTO user_info (
+            user_no,
+            user_name,
+            user_pass,
+            user_tel,
+            user_gubun,
+            user_birth
+        ) VALUES (
+            #{userNo},
+            #{userName},
+            #{userPass},
+            #{userTel},
+            #{userGubun},
+            #{userBirth}
+        )
+    </insert>
+
+
+<!-- 2) 교수 관리 -->
+    <insert id="profAddAjax" parameterType="kr.or.ddit.vo.ProfessorVO">
+
+        INSERT INTO professor (
+            PRO_NO,
+            dept_code,
+            pro_study,
+            emp_date,
+            salary,
+            pro_email,
+            pro_postno,
+            pro_addr,
+            pro_addr_det,
+            pro_position,
+            com_att_m_id
+        ) VALUES (
+            #{proNo},
+            #{deptCode},
+            #{proStudy},
+        	#{empDate},
+            #{salary},
+            #{proEmail},
+            #{proPostno},
+            #{proAddr},
+            #{proAddrDet},
+            #{proPosition},
+            #{comAttMId}
+        )
+    </insert>
+
+
+
+	  <!-- 3) 교수 부모 첨부파일 -->
+    <insert id="comAttachFileAdd" parameterType="ComAttachFileVO">
+
+        INSERT INTO COM_ATTACH_FILE (
+            COM_ATT_M_ID,
+            ATT_FILE_NAME,
+            ATT_FILE_SIZE,
+            ATT_REG_DATE
+        ) VALUES (
+            #{comAttMId},
+            #{attFileName},
+            #{attFileSize},
+            SYSDATE
+        )
+    </insert>
+
+    <!-- 4) 교수 청부파일 정보 ProfessorVO.comAttachDetVO -->
+    <insert id="comAttachDetAdd" parameterType="ComAttachDetVO">
+        INSERT INTO com_attach_det (
+            com_att_det_no,
+            com_att_m_id,
+            logi_file_name,
+            phy_file_name,
+            phy_save_route,
+            phy_reg_date,
+            com_att_det_size,
+            com_att_det_type
+        ) VALUES (
+            #{comAttDetNo},
+            #{comAttMId},
+            #{logiFileName},
+            #{phyFileName},
+            #{phySaveRoute},
+            SYSDATE,
+            #{comAttDetSize},
+            #{comAttDetType}
+        )
+    </insert>
+    
+    <select id="proMaxNo" resultType="String" >
+    SELECT SUBSTR(MAX(user_no), 1, 1) || TRIM(TO_CHAR(SUBSTR(MAX(user_no), 2), '000'))
+			FROM user_info
+			where user_gubun = '02'
+    </select>
+    
+    <insert id=""></insert>
+    
+ 	<!-- 교수 정보 수정 
+ 	ProfessorVO(proNo=null, proAddr=서울 종로구 김상옥로6, empDate=2024-06-26, salary=6000,
+ 	 deptCode=null, proStudy=SOS6, proAddrDet=1056, proPostno=61766, proWorkYn=null, 
+ 	 proRetireDate=6, proPosition=교수6, comAttMId=null, proEmail=test6@naver.com, 
+ 	 proTel=010-0101-4226, userInfoVO=null, comCodeVO=null, comDetCodeVO=null, comAttachDetVO=null, 
+ 	 comAttachFileVO=null, UploadFile=null)]
+ 	-->
+     <update id="updateProfPost" parameterType="ProfessorVO">
+ <!-- PROFESSOR 테이블 업데이트 -->
+		UPDATE  PROFESSOR 
+		   SET 	PRO_POSITION 	= #{proPosition},
+		    	PRO_STUDY 	 	= #{proStudy},
+		   	 	EMP_DATE 		= #{empDate},
+		    	PRO_RETIRE_DATE = #{proRetireDate},
+		    	pro_Email 		= #{proEmail},
+		    	SALARY 			= #{salary},
+		    	PRO_POSTNO 		= #{proPostno},
+		    	PRO_ADDR 		= #{proAddr},
+		    	PRO_ADDR_DET 	= #{proAddrDet}
+		    	<if test="comAttMId != null and comAttMId != ''">
+		    		, COM_ATT_M_ID    = #{comAttMId}
+		    	</if>
+		  WHERE 
+		  		PRO_NO 			= #{proNo}
+	</update>
+    
+    <update id="updateUserPost" parameterType="UserInfoVO">
+ <!-- User 테이블 업데이트 -->
+		UPDATE  USER_INFO
+			SET USER_TEL    = #{userTel}, 
+			    USER_NAME   = #{userName} 
+		  WHERE 
+		  		USER_NO    = #{userNo}
+	</update>
+	
+	<update id="updateFilePost" parameterType="String">
+	<!-- ComAttachDetVO 테이블 Y /N 수정 -->
+		UPDATE COM_ATTACH_DET
+		   SET COM_ATT_DET_DEL_YN = 'Y'
+		 WHERE COM_ATT_M_ID = #{attachId}
+	</update>
+	
+    <insert id="profAuthInsert" parameterType="AuthorityVO">
+    	INSERT INTO authority (
+		      authority
+		    , user_no
+		) VALUES (
+			#{authority},
+			#{userNo}
+		)
+    </insert>
+ </mapper>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

@@ -1,0 +1,1130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.or.ddit.mapper.ProfLectureMapper">
+	
+	<resultMap type="LectureVO" id="lectureVOListMap">
+		<result property="lecNo" column="LEC_NO"/>
+		<result property="proNo" column="PRO_NO"/>
+		<result property="lecYear" column="LEC_YEAR"/>
+		<result property="lecSemester" column="LEC_SEMESTER"/>
+		<result property="lecPer" column="LEC_PER"/>
+		<result property="lecName" column="LEC_NAME"/>
+		<result property="lecType" column="LEC_TYPE"/>
+		<result property="lecScore" column="LEC_SCORE"/>
+		<result property="deptCode" column="DEPT_CODE"/>
+		<result property="lecDiv" column="LEC_DIV"/>
+		<result property="lecCol" column="LEC_COL"/>
+		<result property="lecRoNo" column="LEC_RO_NO"/>
+		<result property="lecGrade" column="LEC_GRADE"/>
+		<result property="lecTimes" column="LEC_TIMES"/>
+		<result property="lecDays" column="LEC_DAYS"/>
+		<association property="comCodeVO" resultMap="comCodeVOMap"></association>
+		<association property="comDetCodeVO" resultMap="comDetCodeVOMap"></association>
+		<association property="lectureRoomVO" resultMap="lectureRoomVOMap"></association>
+		<association property="lectureDetailVOList" resultMap="lectureDetailVOMap"></association>
+	</resultMap>
+	
+	<resultMap type="comCodeVO" id="comCodeVOMap">
+		<result property="comCode" column="COM_CODE"/>
+		<result property="comCodeName" column="COM_CODE_NAME"/>
+		<result property="comCodeContent" column="COM_CODE_CONTENT"/>
+		<result property="comCodeUseYn" column="COM_CODE_USE_YN"/>
+	</resultMap>
+	
+	<resultMap type="comDetCodeVO" id="comDetCodeVOMap">
+		<result property="comDetCode" column="COM_DET_CODE"/>
+		<result property="comDetCodeName" column="COM_DET_CODE_NAME"/>
+		<result property="comDetUseYn" column="COM_DET_USE_YN"/>
+		<result property="comCode" column="COM_CODE"/>
+	</resultMap>
+	
+	<!-- 성적 조회용 VO 연결 -->
+	<resultMap type="StuLectureVO" id="StuLectureVOListMap">
+		<result property="stuLecNo" column="STU_LEC_NO"/>
+		<result property="lecNo" column="LEC_NO"/>
+		<result property="stuLecReYn" column="STU_LEC_RE_YN"/>
+		<result property="stuLecDelYn" column="STU_LEC_DEL_YN"/>
+		<result property="stuLecDiv" column="STU_LEC_DIV"/>
+		<result property="stNo" column="ST_NO"/>
+		<result property="stuEvalTt" column="STU_EVAL_TT"/>
+		<result property="attScore" column="ATT_SCORE"/>
+		<association property="comDetCodeVO" resultMap="comDetCodeVOMap"></association>
+		<association property="userInfoVO" resultMap="userInfoVOMap"></association>
+		<association property="studentVO" resultMap="studentVOMap"></association>	
+		<association property="assigSituVO" resultMap="assigSituVOMap"></association>	
+		<association property="stuTestResVO" resultMap="stuTestResVOMap"></association>	
+		<association property="achievementVO" resultMap="achievementVOMap"></association>	
+	</resultMap>
+	
+	<!-- 과제테이블 -->
+	<resultMap type="AssigSituVO" id="assigSituVOMap">
+		<result property="stuLecNo" column="STU_LEC_NO"/>
+		<result property="assigScore" column="ASSIG_SCORE"/>
+	</resultMap>
+	
+	<!-- 시험결과테이블 -->
+	<resultMap type="StuTestResVO" id="stuTestResVOMap">
+		<result property="middleTestScore" column="MIDDLE_TEST_SCORE"/>
+		<result property="endTestScore" column="END_TEST_SCORE"/>
+		<result property="stuLecNo" column="STU_LEC_NO"/>
+	</resultMap>
+	
+	<!-- 성적테이블 -->
+	<resultMap type="AchievementVO" id="achievementVOMap">
+		<result property="stuLecNo" column="STU_LEC_NO"/>
+		<result property="achieveScore" column="ACHIEVE_SCORE"/>
+		<result property="achieveGrade" column="ACHIEVE_GRADE"/>
+		<result property="lecYn" column="LEC_YN"/>
+	</resultMap>
+	
+	<!-- 성적이의 테이블 -->
+	<resultMap type="AchExeptionVO" id="achExeptionVOMap">
+		<result property="achExepAns" column="ACH_EXEP_ANS"/>
+		<result property="stuLecNo" column="STU_LEC_NO"/>
+		<result property="achExeptionCon" column="ACH_EXEPTION_CON"/>
+		<result property="achExeptionBefore" column="ACH_EXEPTION_BEFORE"/>
+		<result property="achExeptionAfter" column="ACH_EXEPTION_AFTER"/>
+		<result property="achExeptionDate" column="ACH_EXEPTION_DATE"/>
+		<result property="achExepStat" column="ACH_EXEP_STAT"/>
+		<result property="achExepAppDate" column="ACH_EXEP_APP_DATE"/>
+		<association property="lectureVO" resultMap="lectureVOMap"></association>
+		<association property="stuLectureVO" resultMap="stuLectureVOMap"></association>
+		<association property="userInfoVO" resultMap="userInfoVOMap"></association>
+	</resultMap>
+	
+	<!--///// 수빈씨 resultMap -->
+	<resultMap type="LectureVO" id="lectureVOMap">
+		<result property="rn" column="RN"/>
+		<result property="lecNo" column="LEC_NO"/>
+		<result property="proNo" column="PRO_NO"/>
+		<result property="lecYear" column="LEC_YEAR"/>
+		<result property="lecGrade" column="LEC_GRADE"/>
+		<result property="lecSemester" column="LEC_SEMESTER"/>
+		<result property="lecPer" column="LEC_PER"/>
+		<result property="lecName" column="LEC_NAME"/>
+		<result property="lecType" column="LEC_TYPE"/>
+		<result property="lecScore" column="LEC_SCORE"/>
+		<result property="deptCode" column="DEPT_CODE"/>
+		<result property="lecDiv" column="LEC_DIV"/>
+		<result property="lecCol" column="LEC_COL"/>
+		<result property="lecRoNo" column="LEC_RO_NO"/>	
+<!-- 		<collection property="lectureRoomVOList" resultMap="lectureRoomVOMap"></collection> -->
+		<association property="lectureRoomVO" resultMap="lectureRoomVOMap"></association>
+		<collection property="stuLectureVOList" resultMap="stuLectureVOMap"></collection>
+	</resultMap>
+
+	<resultMap type="LectureRoomVO" id="lectureRoomVOMap">
+		<result property="lecRoNo" column="LEC_RO_NO"/>
+		<result property="lecRoName" column="LEC_RO_NAME"/>
+		<result property="bldNo" column="BLD_NO"/>
+<!-- 		<result property="lecRoPic" column="LEC_RO_PIC"/> -->
+		<result property="lecRPer" column="LEC_R_PER"/>
+	</resultMap>	
+	
+	<resultMap type="StuLectureVO" id="stuLectureVOMap">
+		<result property="stuLecNo" column="STU_LEC_NO"/>
+		<result property="lecNo" column="LEC_NO"/>
+		<result property="stuLecReYn" column="STU_LEC_RE_YN"/>
+		<result property="stuLecDelYn" column="STU_LEC_DEL_YN"/>
+		<result property="stuLecDiv" column="STU_LEC_DIV"/>
+		<result property="stNo" column="ST_NO"/>
+		<result property="stuEvalTt" column="STU_EVAL_TT"/>
+		<result property="aggEname" column="AGG_ENAME"/>
+		<result property="maxLecNum" column="MAX_LEC_NUM"/>
+		<association property="comDetCodeVO" resultMap="comDetCodeVOMap"></association>
+		<association property="userInfoVO" resultMap="userInfoVOMap"></association>
+		<association property="studentVO" resultMap="studentVOMap"></association>	
+		<association property="lectureDetailVO" resultMap="lectureDetailVOMap"></association>	
+		<association property="attendanceVO" resultMap="attendanceVOMap"></association>	
+	</resultMap>
+	<resultMap type="UserInfoVO" id="userInfoVOMap">
+		<result property="userNo" column="USER_NO"/>
+		<result property="userName" column="USER_NAME"/>
+		<result property="userPass" column="USER_PASS"/>
+		<result property="userTel" column="USER_TEL"/>
+		<result property="userGubun" column="USER_GUBUN"/>
+		<result property="enabled" column="ENABLED"/>
+	</resultMap>
+	<resultMap type="StudentVO" id="studentVOMap">
+		<result property="stNo" column="ST_NO"/>
+		<result property="stGender" column="ST_GENDER"/>
+		<result property="stPostno" column="ST_POSTNO"/>
+		<result property="stAddr" column="ST_ADDR"/>
+		<result property="stAddrDet" column="ST_ADDR_DET"/>
+		<result property="stAcount" column="ST_ACOUNT"/>
+		<result property="stBank" column="ST_BANK"/>
+		<result property="militaryService" column="MILITARY_SERVICE"/>
+		<result property="stEmail" column="ST_EMAIL"/>
+		<result property="proChaNo" column="PRO_CHA_NO"/>
+		<result property="admissionDate" column="ADMISSION_DATE"/>
+		<result property="stGradDate" column="ST_GRAD_DATE"/>
+		<result property="deptCode" column="DEPT_CODE"/>
+		<result property="stGrade" column="ST_GRADE"/>
+		<result property="stSemester" column="ST_SEMESTER"/>
+	</resultMap>
+	<resultMap type="LectureDetailVO" id="lectureDetailVOMap">
+		<result property="lecNum" column="LEC_NUM"/>
+		<result property="lecDate" column="LEC_DATE"/>
+		<result property="lecNo" column="LEC_NO"/>
+		<result property="lecCon" column="LEC_CON"/>	
+	</resultMap>
+	<resultMap type="kr.or.ddit.vo.AttendanceVO" id="attendanceVOMap">
+		<result property="stuLecNo" column="STU_LEC_NO"/>
+		<result property="stNo" column="ST_NO"/>
+		<result property="lecNum" column="ATTENDANCE_LEC_NUM"/>
+		<result property="lecDate" column="LEC_DATE"/>
+		<result property="lecNo2" column="LEC_NO2"/>
+		<result property="attCode" column="ATT_CODE"/>	
+	</resultMap>
+	
+	
+	<select id="collegeList" resultMap="comCodeVOMap">
+		SELECT
+		    com_code
+		  , com_code_name
+		  , com_code_content
+		  , com_code_use_yn
+		FROM
+		    com_code
+		WHERE
+		    COM_CODE_CONTENT = '단과대학'
+	</select>
+	
+	<select id="deptList" parameterType="String" resultMap="comDetCodeVOMap">
+		SELECT 
+		    D.COM_DET_CODE
+		    , D.COM_DET_CODE_NAME
+		    , D.COM_DET_USE_YN
+		    , D.COM_CODE
+		FROM 
+		    COM_DET_CODE D
+		INNER JOIN
+		    COM_CODE C
+		ON
+		    D.COM_CODE = C.COM_CODE
+		WHERE 
+		    D.COM_CODE = #{collegeCode}
+	</select>
+	
+	
+	<select id="buildList" resultType="buildingInfoVO">
+		SELECT
+		    bld_no
+		  , bld_name
+		FROM
+		    building_info
+	</select>
+
+	<select id="buildSearchList" resultType="buildingInfoVO">
+		SELECT
+		    bld_no
+		  , bld_name
+		FROM
+		    building_info
+		WHERE 
+			bld_name like '%'|| #{buildSeaWord} ||'%'
+	</select>
+	
+	<select id="buildChoice" parameterType="hashMap" resultType="LectureRoomVO">
+		select
+		    lec_ro_no
+		  , lec_ro_name
+		  , bld_no
+		  , lec_ro_pic
+		  , lec_r_per
+		from 
+		    lecture_room
+		where 
+		    lec_ro_no not in (
+		                    select 
+		                    	lec_ro_no
+		                    from 
+		                    	lecture a 
+		                    join 
+		                    	lec_time b
+		                    on 
+		                    	a.lec_no = b.lec_no
+		                    where 
+		                    	a.lec_year = 2024
+		                    and a.LEC_SEMESTER = 2
+		                    and lec_day = #{lecDay0}
+		                    and lec_st BETWEEN #{lecSt0} and #{lecEnd0}
+		                    or a.lec_year = 2024
+		                    and a.LEC_SEMESTER = 2
+		                    and lec_day = #{lecDay0}
+		                    and lec_end BETWEEN #{lecSt0} and #{lecEnd0}
+		                    <if test="lecDay1!=null and lecDay1!=''">
+		                    or a.lec_year = 2024
+		                    and a.LEC_SEMESTER = 2
+		                    and lec_day = #{lecDay1}
+		                    and lec_st BETWEEN #{lecSt1} and #{lecEnd1}
+		                    or lec_day = #{lecDay1}
+		                    and lec_end BETWEEN #{lecSt1} and #{lecEnd1}
+		                    and a.lec_year = 2024
+		                    and a.LEC_SEMESTER = 2
+		                    </if>
+		                )
+		and
+		    bld_no = #{bldNo}
+	</select>
+	
+	<select id="comAttMId" resultType="String">
+		select substr(max(lec_no),1,4)||lpad((substr(max(lec_no),5)+1),3,0)
+	    from lecture
+	</select>
+	
+	<insert id="lecCreate" parameterType="LectureVO">
+		INSERT INTO lecture (
+		    lec_no
+		    , pro_no
+		    , lec_year
+		    , lec_semester
+		    , lec_per
+		    , lec_name
+		    , lec_type
+		    , lec_score
+		    , lec_file
+		    , dept_code
+		    , lec_div
+		    , lec_col
+		    <if test="lecGrade!=null and lecGrade!=''">
+		    , lec_grade
+		    </if>
+		    , lec_ro_no
+		) VALUES (
+		    (select substr(max(lec_no),1,4)||lpad((substr(max(lec_no),5)+1),3,0)
+		    from lecture)
+		  , #{proNo}
+		  , 2024
+		  , 2
+		  , #{lecPer} 
+		  , #{lecName}
+		  , #{lecType}
+		  , #{lecScore}
+		  , #{fileName}
+		  , #{deptCode}
+		  , #{lecDiv}
+		  , #{lecCol}
+		  <if test="lecGrade!=null and lecGrade!=''">
+		  , #{lecGrade}
+	      </if>
+		  , #{lecRoNo}
+		)
+	</insert>
+	<insert id="lecTimeCreate" parameterType="LecTimeVO">
+		INSERT INTO lec_time (
+		    lec_day
+		    , lec_no
+		    , lec_st
+		    , lec_end
+		) VALUES (
+		    #{lecDay}
+		  , (
+		    select max(lec_no)
+		    from lecture
+		    )
+		  , #{lecSt}
+		  , #{lecEnd}
+		)
+	</insert>
+	
+	<insert id="lecDetCreate" parameterType="LectureDetailVO">
+		INSERT INTO lecture_detail (
+		    lec_num
+		    , lec_date
+		    , lec_no
+		    , lec_con
+		) VALUES (
+		    #{lecNum}
+		  , #{lecDate}
+		  , #{lecNo}
+		  , #{lecCon}
+		)
+	</insert>
+	
+	<!-- 강의 계획서 목록 -->
+	<select id="lectureList" parameterType="hashMap" resultMap="lectureVOListMap">
+	    SELECT T.*
+			FROM
+			(
+			SELECT ROW_NUMBER() OVER(ORDER BY lec_year DESC, lec_semester DESC) RNUM,
+			       l.lec_no,
+			       pro_no,
+			       lec_year,
+			       lec_semester,
+			       lec_per,
+			       lec_name,
+			       lec_type,
+			       lec_score,
+			       lec_file,
+			       l.dept_code,
+			       lec_div,
+			       lec_col,
+			       l.lec_ro_no,
+			       lec_grade,
+			       cd.com_det_code_name,
+			       c.com_code_name,
+			       lr.lec_ro_name,
+			       LISTAGG(lt.lec_day, ',') WITHIN GROUP (ORDER BY DECODE(lt.lec_day, '월', 1, '화', 2, '수', 3, '목', 4, '금', 5)) as lec_days,
+			       LISTAGG(to_char(lt.lec_st || '~' || lt.lec_end), ',') WITHIN GROUP (ORDER BY lt.lec_st) AS lec_times
+			FROM lecture l
+			LEFT JOIN com_det_code cd ON l.dept_code = cd.com_det_code
+			LEFT JOIN com_code c ON cd.com_code = c.com_code
+			LEFT JOIN lec_time lt ON l.lec_no = lt.lec_no
+			LEFT JOIN lecture_room lr ON l.lec_ro_no = lr.lec_ro_no
+			WHERE l.pro_no = #{proNo}
+			GROUP BY l.lec_no,
+			         pro_no,
+			         lec_year,
+			         lec_semester,
+			         lec_per,
+			         lec_name,
+			         lec_type,
+			         lec_score,
+			         lec_file,
+			         l.dept_code,
+			         lec_div,
+			         lec_col,
+			         l.lec_ro_no,
+			         lec_grade,
+			         cd.com_det_code_name,
+			         c.com_code_name,
+			         lr.lec_ro_name
+			) T
+			WHERE T.RNUM BETWEEN ((#{currentPage}*10)-(10-1)) AND (#{currentPage}*10)
+	</select>
+	
+	<!-- 강의 계획서 목록갯수 -->
+	<select id="achListPCnt" parameterType="String" resultType="int">
+	    SELECT
+		    count(*)
+		FROM
+		    lecture
+		WHERE 
+		    pro_no = #{proNo}
+	</select>
+	
+	<!-- 강의 내역 (이번학기) -->
+	<select id="lecList" parameterType="hashMap" resultMap="lectureVOListMap">
+	   SELECT T.*
+		FROM
+		(
+		SELECT ROW_NUMBER() OVER(ORDER BY lec_year DESC, lec_semester DESC) RNUM,
+		       l.lec_no,
+		       pro_no,
+		       lec_year,
+		       lec_semester,
+		       lec_per,
+		       lec_name,
+		       lec_type,
+		       lec_score,
+		       lec_file,
+		       l.dept_code,
+		       lec_div,
+		       lec_col,
+		       l.lec_ro_no,
+		       lec_grade,
+		       cd.com_det_code_name,
+		       c.com_code_name,
+		       lr.lec_ro_name,
+		       LISTAGG(lt.lec_day, ',') WITHIN GROUP (ORDER BY DECODE(lt.lec_day, '월', 1, '화', 2, '수', 3, '목', 4, '금', 5)) as lec_days,
+		       LISTAGG(to_char(lt.lec_st || '~' || lt.lec_end), ',') WITHIN GROUP (ORDER BY lt.lec_st) AS lec_times
+		FROM lecture l
+		LEFT JOIN com_det_code cd ON l.dept_code = cd.com_det_code
+		LEFT JOIN com_code c ON cd.com_code = c.com_code
+		LEFT JOIN lec_time lt ON l.lec_no = lt.lec_no
+		LEFT JOIN lecture_room lr ON l.lec_ro_no = lr.lec_ro_no
+		WHERE l.pro_no = #{proNo}
+		AND
+		    lec_year = TO_CHAR(SYSDATE, 'YYYY')
+		AND (
+		    (TO_CHAR(SYSDATE, 'MM') BETWEEN '03' AND '06' AND LEC_SEMESTER = '1')
+		    OR (TO_CHAR(SYSDATE, 'MM') BETWEEN '07' AND '12' AND LEC_SEMESTER = '2')
+		    OR (TO_CHAR(SYSDATE, 'MM') BETWEEN '01' AND '02' AND LEC_SEMESTER = '2')
+		    )
+		GROUP BY l.lec_no,
+		         pro_no,
+		         lec_year,
+		         lec_semester,
+		         lec_per,
+		         lec_name,
+		         lec_type,
+		         lec_score,
+		         lec_file,
+		         l.dept_code,
+		         lec_div,
+		         lec_col,
+		         l.lec_ro_no,
+		         lec_grade,
+		         cd.com_det_code_name,
+		         c.com_code_name,
+		         lr.lec_ro_name
+		) T
+		WHERE T.RNUM BETWEEN ((#{currentPage}*10)-(10-1)) AND (#{currentPage}*10)
+	   
+			
+	</select>
+	
+	<!-- 강의 내역(이번학기) 목록갯수 -->
+	<select id="lecListPCnt" parameterType="String" resultType="int">
+	    SELECT
+		    count(*)
+		FROM
+		    lecture
+		WHERE 
+		    pro_no = #{proNo}
+		AND (
+		        (TO_CHAR(SYSDATE, 'MM') BETWEEN '03' AND '06' AND LEC_SEMESTER = '1')
+		        OR (TO_CHAR(SYSDATE, 'MM') BETWEEN '07' AND '11' AND LEC_SEMESTER = '2')
+		    )
+	</select>
+	
+	<!-- 강의 회차, 회차별 내용  -->
+	<select id="lecDetail" parameterType="String" resultType="LectureDetailVO">
+		SELECT
+		    lec_num
+		  , lec_date
+		  , lec_no
+		  , lec_con
+		FROM
+		    lecture_detail
+		where 
+		    lec_no = #{lecNo}
+		order by lec_num
+	</select>
+	
+	<select id="achiLectureList" parameterType="String" resultType="LectureVO">
+		SELECT
+		    lec_no
+		  , pro_no
+		  , lec_year
+		  , lec_semester
+		  , lec_per
+		  , lec_name
+		  , lec_type
+		  , lec_score
+		  , lec_file
+		  , dept_code
+		  , lec_div
+		  , lec_col
+		  , lec_ro_no
+		FROM
+		    lecture
+		WHERE
+		    pro_no = #{proNo}
+		AND
+		    lec_year = TO_CHAR(SYSDATE, 'YYYY')
+		AND (
+		        (TO_CHAR(SYSDATE, 'MM') BETWEEN '03' AND '07' AND LEC_SEMESTER = '1')
+		        OR (TO_CHAR(SYSDATE, 'MM') BETWEEN '08' AND '11' AND LEC_SEMESTER = '2')
+		    )
+	</select>
+	
+	<!-- 수강생목록 -->
+	<select id="stuLetureList" parameterType="String" resultMap="StuLectureVOListMap">
+		SELECT
+		    ST.user_name user_name,
+		    ST.ST_GRADE,
+		    ST.com_det_code_name,
+		    L.stu_lec_no,
+		    L.lec_no,
+		    L.stu_lec_re_yn,
+		    L.stu_lec_del_yn,
+		    L.stu_lec_div,
+		    L.st_no,
+		    L.stu_eval_tt,
+		    10 - COALESCE(AT.SCORE, 0) - COALESCE(B.SCORE, 0) AS ATT_SCORE,
+		    A.assig_score assig_score,
+		    T.middle_test_score middle_test_score,
+		    T.end_test_score end_test_score,
+		    AC.ACHIEVE_SCORE ACHIEVE_SCORE,
+		    AC.ACHIEVE_GRADE ACHIEVE_GRADE
+		FROM
+		    stu_lecture L
+		LEFT JOIN(
+		    select 
+		        st.st_no ST_NO
+		      , st.st_grade ST_GRADE
+		      , u.user_name user_name
+		      , d.com_det_code_name com_det_code_name
+		    from 
+		        student st
+		    left join
+		        user_info u
+		    on st.st_no = u.user_no
+		    left join
+		        com_det_code d
+		    on st.dept_code = d.com_det_code
+		)ST ON L.ST_NO = ST.ST_NO
+		LEFT JOIN (
+		    SELECT
+		        stu_lec_no,
+		        COUNT(*) AS SCORE
+		    FROM
+		        attendance
+		    WHERE
+		        ATT_CODE = 'AD00104' -- 결석
+		    GROUP BY
+		        stu_lec_no
+		) AT ON L.stu_lec_no = AT.stu_lec_no
+		LEFT JOIN (
+		    SELECT
+		        stu_lec_no,
+		        TRUNC(COUNT(*) / 3) AS SCORE
+		    FROM
+		        attendance
+		    WHERE
+		        ATT_CODE = 'AD00103' -- 지각
+		    GROUP BY
+		        stu_lec_no
+		) B ON L.stu_lec_no = B.stu_lec_no
+		LEFT JOIN 
+		    ASSIG_SITU A ON L.stu_lec_no = A.stu_lec_no
+		LEFT JOIN 
+		    STU_TEST_RES T ON L.stu_lec_no = T.stu_lec_no
+		LEFT JOIN 
+		    achievement ac ON L.stu_lec_no = ac.stu_lec_no
+		WHERE
+		    L.lec_no = #{lecNo}
+		AND
+			L.STU_LEC_DEL_YN = 'N'
+	</select>
+	
+	<!-- 현재 강의 정보 -->
+	<select id="achLectureDetail" parameterType="String" resultType="LectureVO">
+		SELECT
+		    lec_no
+		  , pro_no
+		  , lec_year
+		  , lec_semester
+		  , lec_per
+		  , lec_name
+		  , lec_type
+		  , lec_score
+		  , lec_file
+		  , dept_code
+		  , lec_div
+		  , lec_col
+		  , lec_ro_no
+		  , lec_grade
+		  , (
+		    select count(*)
+		    from stu_lecture
+		    where lec_no = #{lecNo}
+		    and stu_lec_del_yn = 'N'
+		  ) stuCount
+		FROM
+		    lecture
+		where 
+		    lec_no = #{lecNo}
+	</select>
+	
+	<!-- 과제 점수 등록 확인  -->
+	<select id="assigChk" parameterType="StuLectureVO" resultType="int">
+		select count(*) 
+		from assig_situ
+		where STU_LEC_NO = #{stuLecNo}
+	</select>
+	
+	<!-- 과제 점수 등록 -->
+	<insert id="assigInsert" parameterType="AssigSituVO">
+		INSERT INTO assig_situ (
+		    stu_lec_no
+		    , assig_score
+		) VALUES (
+		    #{stuLecNo}
+		  , #{assigScore}
+		)
+	</insert>
+	
+	<!-- 과제 점수 확인 -->
+	<select id="beforeAsScore" parameterType="AssigSituVO" resultType="int" >
+		select assig_score
+		from assig_situ
+		where stu_lec_no = #{stuLecNo}
+	</select>
+	
+	<!-- 과제 점수 업데이트 -->
+	<update id="assigUpdate" parameterType="AssigSituVO">
+		UPDATE assig_situ
+		SET
+		    assig_score = #{assigScore}
+		WHERE
+		    stu_lec_no = #{stuLecNo}
+	</update>
+	
+	<!-- 중간 점수 등록 확인 -->
+	<select id="middleTChk" parameterType="StuLectureVO" resultType="int">
+		SELECT
+		    count(middle_test_score)
+		FROM
+		    stu_test_res
+		WHERE
+		    stu_lec_no =  #{stuLecNo}
+	</select>
+	
+	<!-- 중간 점수 등록 -->
+	<insert id="middleInsert" parameterType="StuTestResVO">
+		INSERT INTO stu_test_res (
+		    stu_lec_no
+		    , middle_test_score
+		) VALUES (
+		    #{stuLecNo}
+		  , #{middleTestScore}
+		)
+	</insert>
+	
+	<!-- 기존 중간 점수 -->
+	<select id="beforeMiddle" parameterType="StuTestResVO" resultType="int">
+		SELECT
+		    middle_test_score
+		FROM
+		    stu_test_res
+		where stu_lec_no = #{stuLecNo}
+	</select>
+	
+	<!-- 중간 점수 업데이트 -->
+	<update id="middleUpdate" parameterType="StuTestResVO">
+		UPDATE stu_test_res
+		SET
+		    middle_test_score = #{middleTestScore}
+		WHERE
+		    stu_lec_no = #{stuLecNo}
+	</update>
+	
+	<!-- 기말 점수 등록 여부 확인 -->
+	<select id="endTChk" parameterType="StuLectureVO" resultType="int">
+		SELECT
+		    count(end_test_score)
+		FROM
+		    stu_test_res
+		WHERE
+		    stu_lec_no =  #{stuLecNo}
+	</select>
+	
+	<!-- 기말 점수 등록 -->
+	<update id="endInsert" parameterType="StuTestResVO">
+		UPDATE stu_test_res
+		SET
+		    end_test_score = #{endTestScore}
+		WHERE
+		    stu_lec_no = #{stuLecNo}
+	</update>
+	
+	<!-- 기존 기말 점수 -->
+	<select id="beforeEnd" parameterType="StuTestResVO" resultType="int">
+		SELECT
+	    	end_test_score
+		FROM
+		    stu_test_res
+		where stu_lec_no = #{stuLecNo}
+	</select>
+	
+	<!-- 기말 점수 업데이트 -->
+	<update id="endUpdate" parameterType="StuTestResVO">
+		UPDATE stu_test_res
+		SET
+		    end_test_score = #{middleTestScore}
+		WHERE
+		    stu_lec_no = #{stuLecNo}
+	</update>
+	
+	<!-- 총점 등록 여부 확인 -->
+	<select id="ttScoreChk" resultType="int" parameterType="StuLectureVO">
+		SELECT count(*)
+		FROM
+		    achievement
+		where stu_lec_no = #{stuLecNo}
+	</select>
+	
+	<!-- 총점 등록 -->
+	<insert id="achievementInsert" parameterType="AchievementVO">
+		INSERT INTO achievement (
+		    stu_lec_no
+		    , achieve_score
+		    , achieve_grade
+		) VALUES (
+		    #{stuLecNo}
+		  , #{achieveScore}
+		  , #{achieveGrade}
+		)
+	</insert>
+	
+	<!-- 기존 총점 등급 -->
+	<select id="beforeAhcGrade" parameterType="AchievementVO" resultType="String">
+		SELECT
+		    achieve_grade
+		FROM
+		    achievement
+		WHERE 
+		    STU_LEC_NO = #{stuLecNo}
+	</select>
+	
+	<!-- 총점/등급 수정 -->
+	<update id="achievementUpdate" parameterType="AchievementVO">
+		UPDATE achievement
+		SET
+		    achieve_score = #{achieveScore}
+		  , achieve_grade = #{achieveGrade}
+		WHERE
+		    stu_lec_no = #{stuLecNo}
+	</update>
+	
+	<!-- 이의신청 목록 -->
+	<select id="achExeptionVOList" parameterType="AchExeptionVO" resultMap="achExeptionVOMap">
+		SELECT
+		    a.stu_lec_no
+		  , ach_exeption_con
+		  , ach_exeption_before
+		  , ach_exeption_after
+		  , to_char(ach_exeption_date,'YYYY-MM-DD') ach_exeption_date
+		  , ach_exep_stat
+		  , to_char(ach_exep_app_date,'YYYY-MM-DD') ach_exep_app_date
+		  , ach_exep_ans
+		  , l.lec_year
+		  , l.lec_semester
+		  , l.lec_name
+		  , l.lec_no
+		  , sl.st_no
+		  , u.user_name
+		FROM
+		    ach_exeption a
+		LEFT JOIN stu_lecture sl ON a.stu_lec_no = sl.stu_lec_no
+		LEFT JOIN lecture l ON sl.lec_no = l.lec_no
+		LEFT JOIN user_info u on sl.st_no = u.user_no
+		WHERE l.pro_no = #{proNo}
+	</select>
+	
+	<!-- 이의신청 학생 성적 -->
+	<select id="achExepDetail" parameterType="String" resultMap="StuLectureVOListMap">
+		SELECT
+		    ST.user_name user_name,
+		    ST.st_no,
+		    ST.ST_GRADE,
+		    ST.com_det_code_name,
+		    L.lec_no,
+		    L.stu_lec_re_yn,
+		    L.stu_lec_del_yn,
+		    L.stu_eval_tt,
+		    10 - COALESCE(AT.SCORE, 0) - COALESCE(B.SCORE, 0) AS ATT_SCORE,
+		    A.assig_score assig_score,
+		    T.middle_test_score middle_test_score,
+		    T.end_test_score end_test_score,
+		    AC.ACHIEVE_SCORE ACHIEVE_SCORE,
+		    AC.ACHIEVE_GRADE ACHIEVE_GRADE
+		FROM
+		    stu_lecture L
+		LEFT JOIN(
+		    select 
+		        st.st_no ST_NO
+		      , st.st_grade ST_GRADE
+		      , u.user_name user_name
+		      , d.com_det_code_name com_det_code_name
+		    from 
+		        student st
+		    left join
+		        user_info u
+		    on st.st_no = u.user_no
+		    left join
+		        com_det_code d
+		    on st.dept_code = d.com_det_code
+		)ST ON L.ST_NO = ST.ST_NO
+		LEFT JOIN (
+		    SELECT
+		        stu_lec_no,
+		        COUNT(*) AS SCORE
+		    FROM
+		        attendance
+		    WHERE
+		        ATT_CODE = 'AD00104' -- 결석
+		    GROUP BY
+		        stu_lec_no
+		) AT ON L.stu_lec_no = AT.stu_lec_no
+		LEFT JOIN (
+		    SELECT
+		        stu_lec_no,
+		        TRUNC(COUNT(*) / 3) AS SCORE
+		    FROM
+		        attendance
+		    WHERE
+		        ATT_CODE = 'AD00103' -- 지각
+		    GROUP BY
+		        stu_lec_no
+		) B ON L.stu_lec_no = B.stu_lec_no
+		LEFT JOIN 
+		    ASSIG_SITU A ON L.stu_lec_no = A.stu_lec_no
+		LEFT JOIN 
+		    STU_TEST_RES T ON L.stu_lec_no = T.stu_lec_no
+		LEFT JOIN 
+		    achievement ac ON L.stu_lec_no = ac.stu_lec_no
+		WHERE
+		    L.stu_lec_no = #{stuLecNo}
+		AND
+		    L.STU_LEC_DEL_YN = 'N'
+	</select>
+	
+	<!-- 이의 신청 답변, 상태 변경 -->
+	<update id="achExepStatUpdate" parameterType="AchExeptionVO">
+		UPDATE ach_exeption
+		SET
+		    ACH_EXEP_ANS = #{achExepAns},
+		    ach_exep_stat = #{achExepStat}
+		WHERE
+	        stu_lec_no = #{stuLecNo}
+	</update>
+	<!-- //////////////////////다희씨 영역 끝 ~!//////////////////////// -->
+	
+	<!-- //////////////////////수빈씨 영역 시작 ~! -->
+	<select id="LectureVOList" parameterType="String" resultMap="lectureVOMap">
+		SELECT
+		    A.lec_no lec_no
+		  , A.pro_no
+		  , A.lec_year lec_year
+		  , A.lec_semester lec_semester
+		  , A.lec_per
+		  , A.lec_name lec_name
+		  , A.lec_type
+		  , A.lec_score
+		  , A.lec_file
+		  , A.dept_code
+		  , A.lec_div
+		  , A.lec_col
+		  , B.lec_ro_no
+		  , B.lec_ro_name lec_ro_name
+		FROM
+		    lecture A,LECTURE_ROOM B
+		WHERE
+		    1=1
+		    AND LEC_YEAR = '2024'
+		    AND LEC_SEMESTER='2'
+		    AND A.lec_ro_no=B.lec_ro_no
+		    AND A.PRO_NO = #{proNo}
+		    order by to_number(substr(lec_no,5))
+	</select>
+	
+	<select id="stuLectureCount" parameterType="StuLectureVO" resultType="StuLectureVO">
+		SELECT T.*
+		FROM
+		(
+		SELECT ROW_NUMBER() OVER(ORDER BY lec_no) RNUM,
+		    stu_lec_no,
+		    lec_no,
+		    stu_lec_re_yn,
+		    stu_lec_del_yn,
+		    stu_lec_div,
+		    st_no,
+		    stu_eval_tt,
+		    (SELECT NVL(COUNT(*), 0)
+		     FROM stu_lecture
+		     WHERE lec_no = #{lecNo}
+		     and STU_LEC_DEL_YN='N') AS stuLecCount
+		FROM
+		    stu_lecture
+		WHERE 1=1  
+		    AND lec_no = #{lecNo}
+		    AND STU_LEC_DEL_YN='N'
+		)T
+		where T.RNUM =1
+	</select>
+	<select id="attendStuList" parameterType="hashMap" resultMap="stuLectureVOMap">
+		WITH S AS (
+		    SELECT T.ST_NO, T.STU_LEC_NO, T.USER_NAME, T.COM_DET_CODE_NAME, T.ST_GRADE,
+		           T.LEC_NO, T.MAX_LEC_NUM, T.LEC_NUM,
+		           FN_LECTURE_LIST(T.LEC_NO, T.ST_NO, T.LEC_NUM) RSLT
+		    FROM (
+		        SELECT A.ST_NO,
+		               A.STU_LEC_NO,
+		               (SELECT B.USER_NAME FROM USER_INFO B WHERE B.USER_NO = A.ST_NO) USER_NAME,
+		               FN_GET_DEPT_NAME(D.DEPT_CODE) COM_DET_CODE_NAME,
+		               D.ST_GRADE,
+		               A.LEC_NO,
+		               (SELECT COUNT(F.LEC_NUM)
+		                FROM LECTURE_DETAIL F
+		                WHERE F.LEC_NO = A.LEC_NO) MAX_LEC_NUM,
+		               G.LEC_NUM
+		        FROM STU_LECTURE A
+		        JOIN STUDENT D ON A.ST_NO = D.ST_NO
+		        JOIN (
+		            SELECT LEC_NO, LEC_NUM
+		            FROM LECTURE_DETAIL
+		            WHERE LEC_NO = #{lecNo}
+		        ) G ON A.LEC_NO = G.LEC_NO
+		        WHERE A.LEC_NO = #{lecNo}
+		          AND A.STU_LEC_DEL_YN = 'N'
+		                <if test="keyword!=null and keyword!=''">
+		                AND (SELECT B.USER_NAME FROM USER_INFO B WHERE B.USER_NO = A.ST_NO) LIKE '%' || #{keyword} || '%'
+		                </if>
+		        ) T
+			)
+			SELECT S.ST_NO, S.STU_LEC_NO, S.USER_NAME, S.COM_DET_CODE_NAME, S.ST_GRADE,
+			       S.LEC_NO, S.MAX_LEC_NUM,
+			       LISTAGG(S.RSLT, ',') WITHIN GROUP (ORDER BY S.LEC_NUM) AS AGG_ENAME
+			FROM S
+			GROUP BY S.ST_NO, S.STU_LEC_NO, S.USER_NAME, S.COM_DET_CODE_NAME, S.ST_GRADE,
+			         S.LEC_NO, S.MAX_LEC_NUM
+	</select>
+	
+	<insert id="attendanceInsert" parameterType="AttendanceVO">
+		INSERT INTO attendance (
+		    stu_lec_no
+		    , st_no
+		    , lec_num
+		    , lec_date
+		    , lec_no2
+		    , att_code
+		) VALUES 
+		(
+			(SELECT FN_GET_STU_LEC_NO(#{lecNo2},#{stNo}) FROM DUAL)
+		  , #{stNo}
+		  , #{lecNum}
+		  , TO_DATE(#{lecDate}, 'YY/MM/DD')
+		  , #{lecNo2}
+		  , #{attCode}
+		  )
+	</insert>
+	
+	<select id="nowAttendStudList" parameterType="hashMap" resultMap="stuLectureVOMap">
+		SELECT
+		    A.ST_NO,
+		    A.STU_LEC_NO,
+		    (SELECT B.USER_NAME FROM USER_INFO B WHERE B.USER_NO = A.ST_NO) AS USER_NAME,
+		    FN_GET_DEPT_NAME(D.DEPT_CODE) AS COM_DET_CODE_NAME,
+		    D.ST_GRADE,
+		    A.LEC_NO,
+		    (SELECT FN_GET_LEC_NUM(A.LEC_NO,#{dateString}) FROM DUAL) AS ATTENDANCE_LEC_NUM
+		FROM
+		    STU_LECTURE A
+		LEFT OUTER JOIN
+		    STUDENT D ON A.ST_NO = D.ST_NO
+		LEFT OUTER JOIN
+		    ATTENDANCE E ON A.ST_NO = E.ST_NO AND E.LEC_NO2 = A.LEC_NO AND E.LEC_DATE = #{dateString}
+		WHERE
+		    A.LEC_NO = #{lecNo}
+		    AND A.STU_LEC_DEL_YN = 'N'
+		    <if test="keyword!=null and keyword!=''">
+             AND A.ST_NO IN (SELECT B.USER_NO FROM USER_INFO B WHERE B.USER_NAME LIKE '%' || #{keyword} || '%')
+            </if>
+		    ORDER BY  A.ST_NO 
+	</select>
+	
+	<select id="nowAttendStudComCode" parameterType="hashMap" resultType="AttendanceVO">
+	SELECT 
+		STU_LEC_NO
+		, ST_NO
+		, LEC_NUM
+		, LEC_DATE
+		, LEC_NO2
+		, ATT_CODE
+	FROM ATTENDANCE 
+	WHERE LEC_NO2 = #{lecNo}
+	AND LEC_NUM = (SELECT FN_GET_LEC_NUM(#{lecNo},#{dateString}) FROM DUAL)	
+	</select>
+	
+	<select id="attendanceComCode" parameterType="String" resultType="kr.or.ddit.vo.ComDetCodeVO">
+		SELECT
+		    com_det_code
+		  , com_det_code_name
+		  , com_det_use_yn
+		  , com_code
+		FROM
+		    com_det_code
+		WHERE     
+			COM_CODE = #{comCode}
+			 AND COM_DET_USE_YN = 'Y'
+	</select>
+	<select id="nowlecNoList" parameterType="hashMap" resultType="StuLectureVO">
+	SELECT DISTINCT
+	    A.LEC_NO
+	    FROM STU_LECTURE A 
+	    INNER JOIN LECTURE B  ON A.LEC_NO=B.LEC_NO
+	    INNER JOIN LECTURE_DETAIL C  ON A.LEC_NO=C.LEC_NO
+    WHERE B.PRO_NO=#{proNo}
+        AND C.LEC_DATE = #{nowAttLecNoDate}
+        AND A.STU_LEC_DEL_YN = 'N'	
+	</select>
+	<!-- //////////////////////수빈씨 영역 끝 ~! -->
+	
+	
+	<!-- ======================================================= 유진씨 구역 시작 -->
+	<!-- 수강 학생 조회 전 교수의 강의 목록 리스트 -->
+	<select id="stuList" resultMap="lectureVOMap" parameterType="String">
+		SELECT T.*,
+		    ROWNUM RN
+		FROM(
+		    SELECT 
+		    	L.LEC_NO
+		        , L.LEC_YEAR
+		        , L.LEC_GRADE
+		        , L.LEC_SEMESTER
+		        , L.LEC_NAME
+		        , R.LEC_RO_NAME
+		        , L.LEC_PER
+		    FROM LECTURE L
+		        INNER JOIN LECTURE_ROOM R ON(L.LEC_RO_NO = R.LEC_RO_NO)
+		    WHERE L.PRO_NO = #{proNo}
+		        AND (
+		            ((TO_CHAR(SYSDATE, 'MM') BETWEEN '01' AND '06') AND L.LEC_SEMESTER = '1')
+		            OR 
+		            ((TO_CHAR(SYSDATE, 'MM') BETWEEN '07' AND '12') AND L.LEC_SEMESTER = '2')
+		        )
+		        AND L.LEC_YEAR = TO_CHAR(SYSDATE, 'YYYY')
+		    ORDER BY L.LEC_NAME ASC
+		)T
+	</select>
+	
+	<sql id="where">
+		<if test="keyword!=null and keyword!=''">
+			<choose>
+				<when test="queGubun == 1">
+					AND (S.ST_NO LIKE '%' || #{keyword} || '%')
+				</when>
+				<when test="queGubun == 2">
+					AND (U.USER_NAME LIKE '%' || #{keyword} || '%')
+				</when>
+				<when test="queGubun == 3">
+					AND (C.COM_DET_CODE_NAME LIKE '%' || #{keyword} || '%')
+				</when>
+			</choose>
+		</if>
+	</sql>
+	
+	<!-- 특정 강의에 대한 학생 목록 전체 행수 -->
+	<select id="stuGetTotal" parameterType="hashMap" resultType="int">
+		SELECT COUNT(*)
+		FROM STU_LECTURE SL
+	        INNER JOIN STUDENT S ON(S.ST_NO = SL.ST_NO)
+		    INNER JOIN LECTURE L ON(SL.LEC_NO = L.LEC_NO)
+		    INNER JOIN COM_DET_CODE C ON(S.DEPT_CODE = C.COM_DET_CODE)
+		    INNER JOIN USER_INFO U ON(U.USER_NO = S.ST_NO)
+		WHERE L.LEC_NO = #{lecNo}
+		<include refid="where"></include>
+	</select>
+	
+	<!-- 수강 학생 조회 (강의 목록 리스트 클릭 후) -->
+	<select id="stuDetail" parameterType="hashMap" resultMap="lectureVOMap">
+		SELECT Y.* FROM (SELECT  ROWNUM RN, T.*
+		FROM
+		(
+		    SELECT S.ST_NO
+		        , U.USER_NAME
+		        , C.COM_DET_CODE_NAME
+		        , S.ST_GRADE
+		        , U.USER_TEL
+		        , DECODE(SL.STU_LEC_RE_YN, 'Y', 'O', 'N', 'X') STU_LEC_RE_YN
+		    FROM STU_LECTURE SL
+		        INNER JOIN STUDENT S ON(S.ST_NO = SL.ST_NO)
+		        INNER JOIN LECTURE L ON(SL.LEC_NO = L.LEC_NO)
+		        INNER JOIN COM_DET_CODE C ON(S.DEPT_CODE = C.COM_DET_CODE)
+		        INNER JOIN USER_INFO U ON(U.USER_NO = S.ST_NO)
+		    WHERE L.LEC_NO = #{lecNo}
+		    AND STU_LEC_DEL_YN = 'N'
+		    <include refid="where"></include>
+		    ORDER BY U.USER_NAME ASC
+		) T ) Y
+		WHERE Y.RN BETWEEN ((#{currentPage} * 10)-(10-1)) AND (#{currentPage} * 10)
+	</select>
+	
+	<!-- ======================================================= 유진씨 구역 끝 -->
+	
+</mapper>

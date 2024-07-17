@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.NoticeMapper">
+	<sql id="where">
+		<if test="keyword!=null and keyword!=''">
+			<choose>
+				<when test="queGubun == 1">
+					AND (QUE_TITLE LIKE '%' || #{keyword} || '%')
+				</when>
+				<when test="queGubun == 2">
+					AND (QUE_GUBUN LIKE '%' || #{keyword} || '%')
+				</when>
+			</choose>
+		</if>
+	</sql>
+	
+	<resultMap type="questionVO" id="noticeListMap">
+		<result property="rn" column="RN"/>
+		<result property="queNo" column="QUE_NO"/>
+		<result property="queTitle" column="QUE_TITLE"/>
+		<result property="queContent" column="QUE_CONTENT"/>
+		<result property="queGubun" column="QUE_GUBUN"/>
+		<result property="queDate" column="QUE_DATE"/>
+		<result property="queUserId" column="QUE_USER_ID"/>
+		<result property="queFDate" column="QUE_F_DATE"/>
+		<result property="queYn" column="QUE_YN"/>
+		<result property="queDelYn" column="QUE_DEL_YN"/>
+		<collection property="userInfoVOList" resultMap="userListMap"></collection>
+	</resultMap>
+	
+	<resultMap type="userInfoVO" id="userListMap">
+		<result property="userNo" column="USER_NO"/>
+		<result property="userName" column="USER_NAME"/>
+		<result property="userPass" column="USER_PASS"/>
+		<result property="userTel" column="USER_TEL"/>
+		<result property="userGubun" column="USER_GUBUN"/>
+		<result property="enabled" column="ENABLED"/>
+	</resultMap>
+	
+	<select id="noticeList" resultMap="noticeListMap" parameterType="hashMap">
+		SELECT Y.* FROM ( SELECT  ROWNUM RN, T.*
+		    FROM
+		    (
+		        SELECT  Q.QUE_NO
+		            , Q.QUE_TITLE
+		            , Q.QUE_CONTENT
+		            , Q.QUE_GUBUN
+		            , TO_CHAR((Q.QUE_DATE), 'YYYY-MM-DD') QUE_DATE
+		            , Q.QUE_USER_ID
+		            , Q.QUE_YN
+		            , Q.QUE_ATT_FILE 
+		            , U.USER_NO
+		            , RPAD(SUBSTR(U.USER_NAME, 0, 1), LENGTH(U.USER_NAME)+1, '*') USER_NAME
+		        FROM QUESTION Q 
+		            INNER JOIN USER_INFO U ON(Q.QUE_USER_ID = U.USER_NO)
+		        WHERE Q.QUE_DEL_YN = 'N'
+		        <include refid="where"></include>
+		        ORDER BY Q.QUE_F_DATE DESC
+		    ) T ) Y
+		WHERE Y.RN BETWEEN ((#{currentPage} * 10)-(10 - 1)) AND (#{currentPage} * 10)
+	</select>
+
+	<!-- 전체 행수 -->
+	<select id="getTotal" parameterType="hashMap" resultType="int">
+		SELECT COUNT(*)
+		FROM QUESTION
+		WHERE 1 = 1
+		<include refid="where"></include>
+	</select>
+	
+	
+	<resultMap type="questionVO" id="questionVOMap">
+		<result property="rn" column="rn"/>
+		<result property="queNo" column="QUE_NO"/>
+		<result property="queTitle" column="QUE_TITLE"/>
+		<result property="queContent" column="QUE_CONTENT"/>
+		<result property="queGubun" column="QUE_GUBUN"/>
+		<result property="queDate" column="QUE_DATE"/>
+		<result property="queUserId" column="QUE_USER_ID"/>
+		<result property="queFDate" column="QUE_F_DATE"/>
+		<result property="queYn" column="QUE_YN"/>
+		<result property="queDelYn" column="QUE_DEL_YN"/>
+		
+		<collection property="answerVOList" resultMap="answerVOMap"></collection>
+		<collection property="userInfoVOList" resultMap="userListMap"></collection>
+		<collection property="comAttachFileVOList" resultMap="comAttachFileVO"></collection>
+		<collection property="comAttachDetVOList" resultMap="comAttachDetVO"></collection>
+	</resultMap>
+	
+	<resultMap type="answerVO" id="answerVOMap">
+		<result property="ansFUserId" column="ANS_F_USER_ID"/>
+		<result property="ansFDate" column="ANS_F_DATE"/>
+		<result property="ansContent" column="ANS_CONTENT"/>
+		<result property="queNo" column="QUE_NO"/>
+		<result property="ansNo" column="ANS_NO"/>
+	</resultMap>
+	
+	<resultMap type="comAttachFileVO" id="comAttachFileVO">
+		<result property="comAttMId" column="COM_ATT_M_ID"/>
+		<result property="attFileName" column="ATT_FILE_NAME"/>
+		<result property="attFileSize" column="ATT_FILE_SIZE"/>
+		<result property="attRegDate" column="ATT_REG_DATE"/>
+	</resultMap>
+	
+	<resultMap type="comAttachDetVO" id="comAttachDetVO">
+     	<result property="comAttDetNo" column="COM_ATT_DET_NO"/>
+		<result property="comAttMId" column="COM_ATT_M_ID"/>
+		<result property="logiFileName" column="LOGI_FILE_NAME"/>
+		<result property="phyFileName" column="PHY_FILE_NAME"/>
+		<result property="phySaveRoute" column="PHY_SAVE_ROUTE"/>
+		<result property="phyRegDate" column="PHY_REG_DATE"/>
+		<result property="comAttDetSize" column="COM_ATT_DET_SIZE"/>
+		<result property="comAttDetType" column="COM_ATT_DET_TYPE"/>
+		<result property="comAttDetDelYn" column="COM_ATT_DET_DEL_YN"/>
+   </resultMap>
+	
+	<!-- 상세 화면 -->
+	<select id="noticeDetail" resultMap="questionVOMap" parameterType="String" >
+		SELECT
+		    Q.QUE_NO
+		    , Q.QUE_TITLE
+		    , Q.QUE_CONTENT
+		    , TO_CHAR((Q.QUE_DATE), 'YYYY-MM-DD') QUE_DATE
+		    , TO_CHAR((Q.QUE_F_DATE), 'YYYY-MM-DD') QUE_F_DATE
+		    , Q.QUE_ATT_FILE
+		    , Q.QUE_GUBUN
+		    , Q.QUE_USER_ID
+	        , RPAD(SUBSTR(U.USER_NAME, 0, 1), LENGTH(U.USER_NAME)+1, '*') USER_NAME
+	        , Q.QUE_YN
+		FROM QUESTION Q
+		    INNER JOIN USER_INFO U ON(Q.QUE_USER_ID = U.USER_NO)
+		WHERE Q.QUE_NO = #{QUE_NO}
+	</select>
+	
+	
+	<!-- 파일업로드 마지막번호 + 1 -->
+	<select id="attEndId" resultType="String">
+		SELECT
+		    NVL(MAX(TO_NUMBER(QUE_NO))+1,'1')
+		FROM
+		    QUESTION
+	</select>
+
+
+	<!-- 등록 -->
+	<insert id="noticeAddPost" parameterType="questionVO">
+
+		<selectKey keyProperty="queNoInsert" resultType="String" order="BEFORE">
+			SELECT
+				NVL(MAX(TO_NUMBER(QUE_NO))+1,'1')
+			FROM
+				QUESTION
+		</selectKey>
+
+		INSERT INTO QUESTION(QUE_NO, QUE_TITLE, QUE_CONTENT, QUE_GUBUN, QUE_DATE, QUE_USER_ID, QUE_YN, QUE_DEL_YN, 
+			<if test="queAttFileId!=null and queAttFileId!=''">
+				QUE_ATT_FILE, 
+			</if>
+				QUE_F_DATE)
+		VALUES(#{queNoInsert}, #{queTitle}, #{queContent}, #{queGubun}, SYSDATE, #{queUserId}, 'N', 'N',
+			<if test="queAttFileId!=null and queAttFileId!=''"> 
+				#{queAttFileId}, 
+			</if>
+				SYSDATE)
+	</insert>
+	
+	<!-- 첨부파일  -->
+	<select id="selectFileList" parameterType="String" resultMap="questionVOMap">
+		SELECT 
+		   ROWNUM RN,
+	       Q.QUE_NO
+	       , Q.QUE_ATT_FILE
+	       , A.COM_ATT_M_ID
+	       , D.LOGI_FILE_NAME
+	       , D.PHY_FILE_NAME
+	       , D.PHY_SAVE_ROUTE
+	       , D.COM_ATT_DET_SIZE
+	       , D.COM_ATT_DET_TYPE
+	      FROM QUESTION Q
+	      INNER JOIN COM_ATTACH_FILE A ON(Q.QUE_ATT_FILE = A.COM_ATT_M_ID)
+	      INNER JOIN COM_ATTACH_DET D ON(Q.QUE_ATT_FILE = D.COM_ATT_M_ID)
+	      WHERE QUE_NO = #{queNo}
+	</select>
+
+	<!-- 답글 -->
+	<select id="ansContent" parameterType="String" resultMap="questionVOMap">
+		SELECT A.ANS_CONTENT
+		    , TO_CHAR(A.ANS_F_DATE, 'YYYY-MM-DD HH24:MI') ANS_F_DATE
+		    , A.ANS_F_USER_ID
+		FROM QUESTION Q
+		    INNER JOIN ANSWER A ON(Q.QUE_NO = A.QUE_NO)
+		WHERE Q.QUE_NO = #{queNo}
+	</select>
+	
+	<!-- 문의사항 수정post -->
+	<update id="updatePost">
+		UPDATE QUESTION
+		SET
+			QUE_NO = #{queNo}
+			,QUE_TITLE = #{queTitle}
+			,QUE_CONTENT = #{queContent}
+			,QUE_DATE =  sysdate
+			<if test="queAttFileId != 'ttbang' ">
+				,QUE_ATT_FILE = #{queAttFileId}
+			</if>
+		WHERE
+			QUE_NO = #{queNo}
+	</update>
+	
+	<!-- 수정할때 기존 파일 삭제 -->
+	<select id="uploadFileDelete" statementType="CALLABLE" parameterType="String">
+		CALL PROC_DELETE_FILE(#{comAttMId})
+	</select>
+	
+	<!-- 문의사항 삭제 -->
+	<update id="deleteAjax" parameterType="String">
+		UPDATE QUESTION 
+		SET QUE_DEL_YN = 'Y'
+		WHERE QUE_NO = #{queNo}
+	</update>
+	
+	<!-- 답글 작성 -->
+	<insert id="commentCreateAjax" parameterType="hashMap">
+		INSERT INTO ANSWER(ANS_NO, QUE_NO, ANS_CONTENT, ANS_F_DATE, ANS_F_USER_ID)
+		VALUES ((SELECT NVL(MAX(TO_NUMBER(ANS_NO))+1, 1) FROM ANSWER), #{queNo}, #{replyCont}, SYSDATE, #{stNo})
+	</insert>
+	
+	
+	<!-- 답글 완료 변경 -->
+	<update id="queYn" parameterType="String">
+		UPDATE QUESTION 
+		SET QUE_YN = 'Y'
+		WHERE QUE_NO = #{queNo}
+	</update>
+</mapper>

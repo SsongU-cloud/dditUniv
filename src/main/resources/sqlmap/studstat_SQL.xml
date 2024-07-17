@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.StudstatMapper">
+
+	<resultMap type="kr.or.ddit.vo.ComAttachDetVO" id="comAttachDetVOMap">
+		<result property="comAttDetNo" column="COM_ATT_DET_NO"/>
+		<result property="comAttMId" column="COM_ATT_M_ID"/>
+		<result property="logiFileName" column="LOGI_FILE_NAME"/>
+		<result property="phyFileName" column="PHY_FILE_NAME"/>
+		<result property="phySaveRoute" column="PHY_SAVE_ROUTE"/>
+		<result property="phyRegDate" column="PHY_REG_DATE"/>
+		<result property="comAttDetSize" column="COM_ATT_DET_SIZE"/>
+		<result property="comAttDetType" column="COM_ATT_DET_TYPE"/>
+		<result property="comAttDetDelYn" column="COM_ATT_DET_DEL_YN"/>
+	</resultMap>
+	
+	<resultMap type="kr.or.ddit.vo.ComAttachFileVO" id="comAttachFileVOMap">
+		<result property="comAttMId" column="COM_ATT_M_ID"/>
+		<result property="attFileName" column="ATT_FILE_NAME"/>
+		<result property="attFileSize" column="ATT_FILE_SIZE"/>
+		<result property="attRegDate" column="ATT_REG_DATE"/>
+	</resultMap>
+	
+	<resultMap type="kr.or.ddit.vo.StudentStatVO" id="studentStatVOMap">
+		<result property="stStat" column="ST_STAT" />
+		<result property="stNo" column="ST_NO" />
+		<result property="stDate" column="ST_DATE" />
+		<result property="stSitu" column="ST_SITU" />
+		<result property="stSituDate" column="ST_SITU_DATE" />
+		<result property="stSituEndDate" column="ST_SITU_END_DATE" />
+		<result property="comAttMId" column="COM_ATT_M_ID"/>
+		<result property="stSituStDate" column="ST_SITU_ST_DATE" />
+		<result property="stSituAppCon" column="ST_SITU_APP_CON" />
+		<result property="stSituAppFUpdDate"
+			column="ST_SITU_APP_F_UPD_DATE" />
+		<association property="comAttachDetVO" resultMap="comAttachDetVOMap"></association>
+		<association property="comAttachFileVO" resultMap="comAttachFileVOMap"></association>
+		
+	</resultMap>
+		
+		<resultMap type="kr.or.ddit.vo.UserInfoVO" id="userInfoVOMap">
+		<result property="userNo" column="USER_NO" />
+		<result property="userName" column="USER_NAME" />
+		<result property="userPass" column="USER_PASS" />
+		<result property="userTel" column="USER_TEL" />
+		<result property="userGubun" column="USER_GUBUN" />
+		<result property="enabled" column="ENABLED" />
+	</resultMap>
+
+
+
+
+<!-- 첨부파일 x > 컬럼 일부 추가 -->
+<insert id="restpart" parameterType="studentStatVO">
+insert into student_stat(
+st_stat, st_no, st_date, st_situ, st_situ_date, 
+st_situ_end_date, st_situ_st_date, st_situ_app_con, 
+st_situ_app_f_upd_date
+)
+values (
+'휴학',
+#{stNo},
+sysdate,
+'승인대기',
+SYSDATE, 
+#{stSituEndDate}, 
+#{stSituStDate}, 
+#{stSituAppCon},
+SYSDATE
+)
+</insert>
+<!-- 첨부파일 o > 컬럼 전부 추가 -->
+<insert id="restall" parameterType="studentStatVO">
+
+	<selectKey keyProperty="seqrest" resultType="integer" order="BEFORE">
+	
+	select seqrest.CURRVAL from dual
+	
+	</selectKey>
+
+insert into student_stat
+values (
+'휴학',
+#{stNo},
+sysdate,
+'승인대기',
+SYSDATE, 
+#{stSituEndDate}, 
+#{stNo}||'Rest'||trim(to_char(#{seqrest},'000')),  
+#{stSituStDate}, 
+#{stSituAppCon}, 
+SYSDATE
+)
+
+</insert>
+
+
+<!-- 첨부파일 추가 1 -->
+<insert id="statatt1" parameterType="hashMap">
+
+<selectKey keyProperty="seqrest" resultType="integer" order="BEFORE">
+	
+	select seqrest.nextval from dual
+	
+	</selectKey>
+
+<!--     (select ${stNo}||'Rest'|| -->
+<!-- 	to_char(#{seqrest},'000') from dual) -->
+
+
+ 	insert into com_attach_file
+    values(
+    #{stNo}||'Rest'||trim(to_char(#{seqrest},'000')),
+    #{stNo}||'Rest'||trim(to_char(#{seqrest},'000')),
+    #{attFileSize},
+    sysdate
+    )
+
+
+</insert>
+
+<!-- 첨부파일 추가 2 -->
+
+<insert id="statatt2" parameterType="hashMap">
+
+
+	<selectKey keyProperty="seqrest" resultType="integer" order="BEFORE">
+	
+		select seqrest.CURRVAL from dual
+	
+	</selectKey>
+
+	insert into com_attach_det 
+	values(
+	1,
+	#{stNo}||'Rest'||trim(to_char(#{seqrest},'000')),
+	#{logiFileName},
+	#{phyFileName},
+	#{phySaveRoute},
+	SYSDATE,
+	#{comAttDetSize},
+	#{comAttDetType},
+	'N'
+	)
+
+</insert>
+
+<!-- 휴학 신청 내역 COM_ATT_DET_NO -->
+<select id="restlist" parameterType="String" resultMap="studentStatVOMap">
+
+	SELECT
+		  SS.ST_STAT
+		, SS.ST_NO
+		, TO_CHAR(SS.ST_DATE, 'YYYY-MM-DD') AS ST_DATE
+		, SS.ST_SITU
+		, TO_CHAR(SS.ST_SITU_DATE, 'YYYY-MM-DD') AS ST_SITU_DATE
+		, TO_CHAR(SS.ST_SITU_END_DATE, 'YYYY-MM-DD') AS ST_SITU_END_DATE
+		, SS.COM_ATT_M_ID
+		, TO_CHAR(SS.ST_SITU_ST_DATE, 'YYYY-MM-DD') AS ST_SITU_ST_DATE
+		, SS.ST_SITU_APP_CON
+		, SS.ST_SITU_APP_F_UPD_DATE
+	FROM
+		STUDENT_STAT SS
+		WHERE SS.ST_NO = #{stNo} 
+		AND SS.ST_STAT = '휴학'
+
+</select>
+
+<!-- 담당 교수 이름 -->
+	
+	<select id="proName" parameterType="String" resultMap="userInfoVOMap">
+
+	select user_name from user_info
+	where user_no = (
+	select pro_cha_no from student
+	where st_no = #{stNo})
+
+	</select>
+
+</mapper>

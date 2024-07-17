@@ -1,0 +1,728 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.TutionMapper">
+
+
+	<sql id="where">
+		<if test="keyword!=null and keyword!=''">
+			<choose>
+				<when test="queGubun == 1">
+					AND (QUE_TITLE LIKE '%' || #{keyword} || '%')
+				</when>
+				<when test="queGubun == 2">
+					AND (QUE_GUBUN LIKE '%' || #{keyword} || '%')
+				</when>
+			</choose>
+		</if>
+	</sql>
+
+	<resultMap type="kr.or.ddit.vo.TuitionPayVO" id="tuitionPayMap">
+	
+	<result property="semester" column="SEMESTER"/>
+		<result property="stNo" column="ST_NO"/>
+		<result property="year" column="YEAR"/>
+		<result property="tuiPayDate" column="TUI_PAY_DATE"/>
+		<result property="tuiPayAmount" column="TUI_PAY_AMOUNT"/>
+		<result property="tuiPayReAmount" column="TUI_PAY_RE_AMOUNT"/>
+		<result property="scolDNo" column="SCOL_D_NO"/>
+		<result property="tuiPayInstallYn" column="TUI_PAY_INSTALL_YN"/>
+		<result property="deptCode" column="DEPT_CODE"/>
+		<association property="scolarshipHistoryVO" resultMap="scolarshipHistoryMap">
+		</association>
+		
+	
+	</resultMap>
+
+	<resultMap type="kr.or.ddit.vo.ScolarshipHistoryVO"
+		id="scolarshipHistoryMap">
+		<result property="year" column="YEAR" />
+		<result property="scolDNo" column="SCOL_D_NO" />
+		<result property="scolMethod" column="SCOL_METHOD" />
+		<result property="semester" column="SEMESTER" />
+		<result property="scolCode" column="SCOL_CODE" />
+		<result property="stNo" column="ST_NO" />
+		<result property="scolarPay" column="scolarPay" />
+		<result property="scolHiYn" column="SCOL_HI_YN" />
+		<result property="scolAmount" column="SCOL_AMOUNT" />
+		<association property="studentVO" resultMap="studentMap"></association>
+		<association property="scolarshipVO"
+			resultMap="scolarshipMap"></association>
+	</resultMap>
+
+
+	<resultMap type="kr.or.ddit.vo.StudentVO" id="studentMap">
+		<result property="stNo" column="ST_NO" />
+		<result property="stGender" column="ST_GENDER" />
+		<result property="stPostno" column="ST_POSTNO" />
+		<result property="stAddr" column="ST_ADDR" />
+		<result property="stAddrDet" column="ST_ADDR_DET" />
+		<result property="stAcount" column="ST_ACOUNT" />
+		<result property="stBank" column="ST_BANK" />
+		<result property="militaryService" column="MILITARY_SERVICE" />
+		<result property="stEmail" column="ST_EMAIL" />
+		<result property="proChaNo" column="PRO_CHA_NO" />
+		<result property="admissionDate" column="ADMISSION_DATE" />
+		<result property="stGradDate" column="ST_GRAD_DATE" />
+		<result property="deptCode" column="DEPT_CODE" />
+		<result property="stGrade" column="ST_GRADE" />
+		<association property="deptTuitionPayVO" 
+		resultMap="deptTuitionPayVOMap"></association>
+		<association property="userInfoVO"
+		resultMap="userInfoVOMap"></association>
+		<association property="comDetCodeVO"
+		resultMap="comDetCodeVOMap"></association>
+		<!-- <association property="comCodeVO" resultMap="comCodeMap"></association> -->
+		<!-- <association property="stuAttachFileVO" -->
+		<!-- resultMap="stuAttachFileVOMap"></association> -->
+		<!-- <association property="studentStatVO" -->
+		<!-- resultMap="studentStatVOMap"></association> -->
+
+	</resultMap>
+	
+	<resultMap type="kr.or.ddit.vo.DeptTuitionPayVO" id="deptTuitionPayVOMap">
+	<result property="deptCode" column="DEPT_CODE"/>
+	<result property="year" column="YEAR"/>
+	<result property="deptTuiPay" column="DEPT_TUI_PAY"/>
+	</resultMap>
+
+
+	<resultMap type="kr.or.ddit.vo.ScolarshipVO"
+		id="scolarshipMap">
+		<result property="scolCode" column="SCOL_CODE" />
+		<result property="scolarshipRatio" column="SCOLARSHIP_RATIO" />
+		<result property="scolType" column="SCOL_TYPE" />
+		<result property="scolName" column="SCOL_NAME" />
+		<result property="scolGubun" column="SCOL_GUBUN" />
+	</resultMap>
+	
+	<resultMap type="kr.or.ddit.vo.TuitionListVO" id="tuitionListMap">
+		<result property="scolar" column="scolar"/>
+		<result property="userName" column="USER_NAME"/>
+		<result property="comDetCodeName" column="COM_DET_CODE_NAME"/>
+		<result property="RNUM" column="RNUM"/>
+		<result property="currentPage" column="currentPage"/>
+		<association property="tuitionVO" resultMap="tuitionMap" />
+		<association property="tuitionPayVO" resultMap="tuitionPayMap" />
+		<association property="tuitionDivPayVO" resultMap="tuitionDivMap" />
+		<association property="scolarshipVO" resultMap="scolarshipMap" />
+<!-- 		<collection property="tuitionDivPayList" resultMap="tuitionDivMap" /> -->
+		<collection property="scolarshipHistoryList" resultMap="scolarshipHistoryMap" />
+	</resultMap>
+	
+	<resultMap type="kr.or.ddit.vo.TuitionVO" id="tuitionMap">
+		<result property="semester" column="SEMESTER"/>
+		<result property="year" column="YEAR"/>
+		<result property="stNo" column="ST_NO"/>
+		<result property="tuiCost" column="TUI_COST"/>
+		<result property="tuiSchedule" column="TUI_SCHEDULE"/>
+		<result property="tuiPayYn" column="TUI_PAY_YN"/>
+		<result property="scolAmount" column="SCOL_AMOUNT"/>
+		<result property="scolarPay" column="SCOLARPAY"/>
+		<association property="scolarshipHistoryVO" resultMap="scolarshipHistoryMap"></association>
+		<association property="scolarshipVO" resultMap="scolarshipMap"></association>
+		<collection property="divPayTermVO" resultMap="divPayTermMap"></collection>
+	</resultMap>
+	
+	
+	<resultMap type="kr.or.ddit.vo.TuitionDivPayVO" id="tuitionDivMap">
+	<result property="divPaySq" column="DIV_PAY_SQ"/>
+	<result property="divChanges" column="DIV_CHANGES"/>
+	<result property="semester" column="SEMESTER"/>
+	<result property="stNo" column="ST_NO"/>
+	<result property="year" column="YEAR"/>
+	<result property="divPayAmount" column="DIV_PAY_AMOUNT"/>
+	<result property="divPayDate" column="DIV_PAY_DATE"/>
+	<result property="divPayDateStr" column="DIV_PAY_DATE_STR"/>
+	<result property="scolAmount" column="SCOL_AMOUNT" />
+	</resultMap>
+	
+	<resultMap type="kr.or.ddit.vo.ComDetCodeVO"
+		id="comDetCodeVOMap">
+		<result property="comDetCode" column="COM_DET_CODE" />
+		<result property="comDetCodeName" column="COM_DET_CODE_NAME" />
+		<result property="comDetUseYn" column="COM_DET_USE_YN" />
+		<result property="comCode" column="COM_CODE" />
+	</resultMap>
+	
+		<resultMap type="kr.or.ddit.vo.UserInfoVO" id="userInfoVOMap">
+		<result property="userNo" column="USER_NO" />
+		<result property="userName" column="USER_NAME" />
+		<result property="userPass" column="USER_PASS" />
+		<result property="userTel" column="USER_TEL" />
+		<result property="userGubun" column="USER_GUBUN" />
+		<result property="enabled" column="ENABLED" />
+	</resultMap>
+	
+	<resultMap type="kr.or.ddit.vo.DivPayTermVO" id="divPayTermMap">
+	<result property="year" column="YEAR"/>
+	<result property="semester" column="SEMESTER"/>
+	<result property="divPaySq" column="DIV_PAY_SQ"/>
+	<result property="divPayStDate" column="DIV_PAY_ST_DATE"/>
+	<result property="divPayEnDate" column="DIV_PAY_EN_DATE"/>
+	</resultMap>
+	
+
+<!-- 	등록금 완납/분납 -->
+	<select id="paylist" parameterType="String">
+	 select a.*, 
+      b.* from tuition_pay a left join tuition_div_pay b
+      on a.semester = b.semester 
+      and a.st_no = b.st_no
+      and a.year = b.year
+      and a.st_no = #{stNo}
+      
+      </select>
+      
+<!--   장학금 -->
+      <select id="scloarlist" parameterType="String">
+      select a.*, b.* from tuition_pay a left join scolarship_history b
+      on a.st_no = b.st_no
+      and a.year = b.year
+      and a.semester = b.semester
+      and a.st_no = #{stNo}
+      
+      </select>
+
+
+
+	<select id="list" parameterType="String" resultMap="scolarshipHistoryMap">
+
+
+		SELECT A.*, B.*, c.admission_date, d.*, a.scolarship_ratio*d.dept_tui_pay scolarPay
+		FROM
+		SCOLARSHIP A, SCOLARSHIP_HISTORY B, STUDENT C, dept_tuition_pay d
+		WHERE
+		A.SCOL_CODE = B.SCOL_CODE AND
+        b.semester = d.semester AND
+        b.year = d.year AND
+		B.ST_NO = C.ST_NO AND
+        c.dept_code = d.dept_code and
+		B.ST_NO = #{stNo}
+		order by b.year desc, b.semester desc
+
+
+<!-- 		SELECT A.*, B.*, c.admission_date, d.*, a.scolarship_ratio*d.dept_tui_pay scolarPay -->
+<!-- 		FROM -->
+<!-- 		SCOLARSHIP A, SCOLARSHIP_HISTORY B, STUDENT C, dept_tuition_pay d -->
+<!-- 		WHERE -->
+<!-- 		A.SCOL_CODE = B.SCOL_CODE AND -->
+<!-- 		B.ST_NO = C.ST_NO AND -->
+<!--         c.dept_code = d.dept_code and -->
+<!-- 		B.ST_NO = #{stNo}  -->
+<!-- 		order by b.year desc, b.semester desc -->
+
+
+	</select>
+	
+	<!-- 	학과 이름 인 학생 조회 공유 -->
+	<select id="findst" parameterType="DeptTuitionPayVO" resultType="String">
+	
+	select st_no from student where dept_code = 
+	(select com_det_code from com_det_code where com_det_code_name = #{comDetCodeName})
+	
+	</select>
+	
+	<!-- 	학과이름으로 학과번호 조회 -->
+	<select id="finddept" parameterType="DeptTuitionPayVO" resultType="String">
+	
+	select com_det_code  from com_det_code 
+	where com_det_code_name = #{comDetCodeName}
+	
+	</select>
+	
+	<insert id="inserttui1" parameterType="DeptTuitionPayVO">
+	insert into
+	div_pay_term
+	values(
+	#{year},
+	#{semester},
+	0,
+	#{divPayStDate},
+	#{divPayEnDate}
+	)
+
+	</insert>
+
+	<insert id="inserttui2" parameterType="DeptTuitionPayVO">
+
+	insert into
+	dept_tuition_pay
+	values(
+	(select com_det_code
+	from com_det_code
+	where com_det_code.com_det_code_name = #{comDetCodeName}
+	),
+	#{year},
+	#{deptTuiPay},
+	#{semester}
+	)
+
+	</insert>
+
+	<insert id="inserttui3" parameterType="DeptTuitionPayVO">
+	
+	insert into tuition(semester, year, st_no, tui_cost, tui_schedule, tui_pay_yn, tui_start_date)
+	values(
+	#{semester}, #{year}, #{stNo2}, #{deptTuiPay}, #{divPayEnDate}, 'N', #{divPayStDate}
+	)
+	
+	</insert>
+	
+	<insert id="inserttui4" parameterType="DeptTuitionPayVO">
+	
+	insert into tuition_pay(semester, st_no, year, TUI_PAY_DATE, tui_pay_amount, tui_pay_re_amount, tui_pay_install_yn, dept_code) 
+	values(
+	#{semester}, #{stNo2}, #{year}, sysdate, #{deptTuiPay}, #{deptTuiPay},'N', #{comDetCode}
+	)
+	
+	</insert>
+	
+	
+	<select id="depttui" parameterType="String" resultMap="studentMap">
+	
+	select a.*, b.* 
+	from student a, dept_tuition_pay b
+	where
+	a.dept_code = b.dept_code and
+	a.st_no = #{stNo}
+	
+	</select>
+	
+	
+<!-- 	조건 조회 -->
+
+	<select id="conlist" parameterType="scolarshipHistoryVO" resultMap="scolarshipHistoryMap">
+	
+		SELECT A.*, B.*, c.admission_date, d.*, a.scolarship_ratio*d.dept_tui_pay scolarPay
+		FROM
+		SCOLARSHIP A, SCOLARSHIP_HISTORY B, STUDENT C, dept_tuition_pay d
+		WHERE
+		A.SCOL_CODE = B.SCOL_CODE AND
+		B.ST_NO = C.ST_NO AND
+        c.dept_code = d.dept_code and
+		B.ST_NO = #{stNo} and
+        b.year = #{year} and b.semester = #{semester}
+		order by b.year desc, b.semester desc
+	
+	</select>
+
+<!-- 학생 개인 정보 (납부확인 모달) -->
+<select id="stuinfo" parameterType="String" resultMap="studentMap">
+
+select a.st_no, b.user_name, c.com_det_code_name 
+from student a, user_info b, com_det_code c 
+where a.st_no = b.user_no
+and a.dept_code = c.com_det_code
+and st_no = #{stNo}
+
+
+</select>
+
+
+<!-- 등록금 납부 내역 전체-->
+<select id="payList" parameterType="String" resultMap="tuitionListMap">
+
+	select tuition.semester, tuition.year, tuition.st_no, tuition.tui_cost, tuition.tui_schedule, tuition.tui_pay_yn,
+		NVL(TO_CHAR(tuition_pay.tui_pay_date, 'YYYY-MM-DD'),'미납') tui_pay_date,
+    	tuition_pay.tui_pay_amount, tuition_pay.tui_pay_re_amount, 
+    	tuition_pay.scol_d_no, tuition_pay.tui_pay_install_yn, tuition_pay.dept_code,
+    	tuition_div_pay.div_pay_sq, tuition_div_pay.scol_amount, 
+    	tuition_div_pay.div_pay_amount, 
+    	to_char(tuition_div_pay.div_pay_date,'yyyy-mm-dd') div_pay_date, 
+    	tuition_div_pay.div_changes,
+    	scolarship_history.scol_method, scolarship.scolarship_ratio, 
+    	scolarship_history.scol_hi_yn, scolarship_history.scol_amount
+    from tuition left outer join tuition_pay on tuition.st_no = tuition_pay.st_no
+    and tuition.year = tuition_pay.year
+    and tuition.semester = tuition_pay.semester
+    and tuition.st_no = #{stNo}
+    	left outer join tuition_div_pay on tuition_div_pay.st_no = tuition_pay.st_no
+    and tuition_div_pay.year = tuition_pay.year
+    and tuition_div_pay.semester = tuition_pay.semester
+    and tuition_div_pay.st_no = #{stNo}
+	    left outer join scolarship_history
+	    on tuition_pay.scol_d_no = scolarship_history.scol_d_no
+    and tuition_pay.st_no = scolarship_history.st_no
+    and scolarship_history.year = tuition_pay.year
+    and scolarship_history.semester = tuition_pay.semester
+    and tuition_pay.st_no = #{stNo} 
+	    left outer join scolarship
+	    on scolarship_history.scol_code = scolarship.scol_code
+        AND scolarship_history.st_no = tuition_pay.st_no
+        AND scolarship_history.st_no = #{stNo}
+        where tuition.st_no = #{stNo} AND tuition.tui_pay_yn = 'Y'
+	    order by tuition.year desc, tuition.semester desc, tuition_div_pay.div_pay_sq desc
+
+
+</select>
+
+<!-- 관리자 납부 내역 조회 -->
+<select id="deptlist2" parameterType="hashMap" resultMap="tuitionListMap">
+
+SELECT T.* 
+FROM
+(SELECT tuition.semester, tuition.year, tuition.tui_cost, tuition.st_no, 
+tuition.tui_schedule, tuition.tui_pay_yn,
+NVL(TO_CHAR(tuition_pay.tui_pay_date, 'YYYY-MM-DD'),'미납') tui_pay_date,
+tuition_pay.tui_pay_amount, tuition_pay.tui_pay_re_amount, 
+tuition_pay.scol_d_no, tuition_pay.tui_pay_install_yn, tuition_pay.dept_code,
+tuition_div_pay.div_pay_sq, tuition_div_pay.scol_amount, 
+tuition_div_pay.div_pay_amount, 
+to_char(tuition_div_pay.div_pay_date,'yyyy-mm-dd') div_pay_date, 
+tuition_div_pay.div_changes,
+scolarship_history.scol_method, scolarship.scolarship_ratio, 
+scolarship_history.scol_hi_yn,
+user_info.USER_NAME, COM_DET_CODE.COM_DET_CODE_NAME,
+ROW_NUMBER() OVER(ORDER BY tuition.year desc, tuition.semester desc, user_info.USER_NAME ASC, tuition_div_pay.div_pay_sq desc) RNUM
+from tuition left outer join tuition_pay 
+on tuition.st_no = tuition_pay.st_no
+and tuition.year = tuition_pay.year
+and tuition.semester = tuition_pay.semester
+    	left outer join tuition_div_pay on tuition_div_pay.st_no = tuition_pay.st_no
+    and tuition_div_pay.year = tuition_pay.year
+    and tuition_div_pay.semester = tuition_pay.semester
+	    left outer join scolarship_history
+	    on tuition_pay.scol_d_no = scolarship_history.scol_d_no
+    and tuition_pay.st_no = scolarship_history.st_no
+    and scolarship_history.year = tuition_pay.year
+    and scolarship_history.semester = tuition_pay.semester
+	    left outer join scolarship
+	    on scolarship_history.scol_code = scolarship.scol_code
+        AND scolarship_history.st_no = tuition_pay.st_no
+        INNER JOIN 
+        STUDENT S
+        ON  tuition.ST_NO = S.ST_NO
+        INNER JOIN user_info ON tuition.ST_NO = user_info.USER_NO
+        INNER JOIN com_det_code ON S.DEPT_CODE = com_det_code.COM_DET_CODE
+        AND COM_DET_CODE.COM_DET_CODE_NAME = #{comDetCodeName}
+        ) T
+        WHERE T.RNUM BETWEEN ((#{currentPage} * 10) - (10 - 1)) AND (#{currentPage} * 10)
+
+
+</select>
+
+<!-- 등록금 납부내역 상세 -->
+<!-- {semester=2023, year=2, seq=0, stNo=A006} -->
+
+<select id="paydetail" parameterType="hashMap" resultMap="tuitionListMap">
+
+	select t.semester, t.year, t.st_no, t.tui_cost, t.tui_schedule, t.tui_pay_yn,
+		tp.tui_pay_date, tp.tui_pay_amount, tp.tui_pay_re_amount, 
+		tp.scol_d_no, tp.tui_pay_install_yn, tp.dept_code,
+		tdp.div_pay_sq, tdp.scol_amount, 
+		tdp.div_changes,
+		tdp.div_pay_amount, tdp.div_pay_date, to_char(tdp.div_pay_date,'yyyy-mm-dd') div_pay_date_str,
+		sh.scol_method, s.scolarship_ratio, 
+		sh.scol_hi_yn, sh.scol_amount
+	from tuition t inner join tuition_pay tp on(t.st_no = tp.st_no
+	and t.year = tp.year
+	and t.semester = tp.semester
+	and t.st_no = #{stNo}
+	and t.semester = #{semester} 
+	and t.year = #{year})
+		inner join tuition_div_pay tdp on(tdp.st_no = tp.st_no
+	and tdp.year = tp.year
+	and tdp.semester = tp.semester
+	and tdp.st_no = #{stNo}
+	and tdp.semester = #{semester} 
+	and t.year = #{year}
+	and tdp.div_pay_sq = #{seq})
+		inner join scolarship_history sh
+		on(tp.scol_d_no = sh.scol_d_no
+	and tp.st_no = sh.st_no
+	and sh.year = tp.year
+	and sh.semester = tp.semester
+	and tp.st_no = #{stNo}
+	and tp.year = #{year}
+	and tp.semester = #{semester} )
+		inner join scolarship s
+		on(sh.scol_code = s.scol_code)
+		order by t.year desc, t.semester desc, tdp.div_pay_sq desc
+</select>
+
+<!-- 현재 날짜 기준 완납?분납 페이지만 형성-->
+
+<select id="fwsysdate" resultMap="divPayTermMap">
+
+   SELECT dp.year, dp.semester, dp.div_pay_sq,
+   nvl2(dp.div_pay_st_date,to_char(dp.div_pay_st_date,'yyyy-mm-dd'),0) div_pay_st_date,
+   nvl2(dp.div_pay_en_date,to_char(dp.div_pay_en_date,'yyyy-mm-dd'),0) div_pay_en_date
+   FROM div_pay_term dp 
+   where sysdate between dp.div_pay_st_date and dp.div_pay_en_date
+
+
+</select>
+
+<!-- 전체 납부기간 조회 - 현재 날짜 기준 -->
+<select id="allpay" parameterType="String" resultMap="tuitionMap">
+
+
+<!-- 	SELECT T.SEMESTER, T.YEAR, T.ST_NO, t.tui_cost, t.tui_pay_yn, -->
+<!-- 	to_char(dpt.div_pay_st_date,'yyyy-mm-dd') div_pay_st_date, -->
+<!-- 	to_char(dpt.div_pay_en_date,'yyyy-mm-dd') div_pay_en_date, -->
+<!--     (SELECT NVL(MAX(H.SCOL_AMOUNT),0)  FROM SCOLARSHIP_HISTORY H  -->
+<!--     WHERE  H.ST_NO = T.ST_NO -->
+<!--     AND      H.SEMESTER = T.SEMESTER -->
+<!--     AND      H.YEAR = T.YEAR -->
+<!--     and H.scol_method != '계좌지급' and h.scol_hi_yn = 'N') SCOL_AMOUNT, -->
+<!--     DPT.DIV_PAY_SQ -->
+<!-- 	FROM TUITION T, DIV_PAY_TERM DPT -->
+<!-- 	WHERE DPT.YEAR = T.YEAR -->
+<!-- 	AND DPT.SEMESTER = T.SEMESTER -->
+<!-- 	AND DPT.DIV_PAY_SQ = 0 -->
+<!-- 	AND T.ST_NO = #{stNo} -->
+<!-- 	and sysdate between dpt.div_pay_st_date and dpt.div_pay_en_date -->
+
+	SELECT A.year, a.semester,  a.st_no, a.tui_cost, a.tui_pay_yn, a.div_pay_st_date, a.div_pay_en_date,
+    a.div_pay_sq, s.scolarship_ratio*a.tui_cost scolarPay
+    FROM    
+    (SELECT T.SEMESTER, T.YEAR, T.ST_NO, t.tui_cost, t.tui_pay_yn,
+	to_char(dpt.div_pay_st_date,'yyyy-mm-dd') div_pay_st_date,
+	to_char(dpt.div_pay_en_date,'yyyy-mm-dd') div_pay_en_date,
+    DPT.DIV_PAY_SQ
+	FROM TUITION T, DIV_PAY_TERM DPT
+	WHERE DPT.YEAR = T.YEAR
+	AND DPT.SEMESTER = T.SEMESTER
+	AND DPT.DIV_PAY_SQ = 0
+	AND T.ST_NO = #{stNo}
+    and sysdate between dpt.div_pay_st_date and dpt.div_pay_en_date) A
+    left outer join scolarship_history sh
+    on A.semester = sh.semester
+    and A.year = sh.year
+    and A.st_no = sh.st_no
+    inner join scolarship s
+    on sh.SCOL_CODE = s.SCOL_CODE
+
+
+
+
+</select>
+
+<update id="allpay1" parameterType="hashMap">
+    UPDATE tuition_pay 
+    SET
+    TUI_PAY_RE_AMOUNT = 0,
+    TUI_PAY_INSTALL_YN = 'Y',
+    TUI_PAY_DATE = SYSDATE
+    WHERE ST_NO = #{stNo}
+    AND SEMESTER = #{semester}
+    AND YEAR = #{year}
+
+</update>
+
+<insert id="allpay2" parameterType="hashMap">
+
+    insert into tuition_div_pay
+    values(
+    0,#{semester},#{stNo},#{year},#{realpay},SYSDATE,#{scolAmount},0
+    )
+
+</insert>
+
+<update id="allpay3" parameterType="hashMap">
+
+UPDATE TUITION
+SET 
+TUI_PAY_YN = 'Y'
+WHERE SEMESTER = #{semester}
+AND YEAR = #{year}
+AND ST_NO = #{stNo}
+
+</update>
+
+<update id="allpay4" parameterType="hashMap">
+
+ 	UPDATE SCOLARSHIP_HISTORY
+    SET
+    SCOL_HI_YN = 'Y'
+    WHERE semester = #{semester}
+    AND YEAR = #{year}
+    AND ST_NO = #{stNo}
+
+</update>
+
+<!-- 부분 납부 화면 조회용 > 작성 시기 max-->
+<!-- <select id="partview" parameterType="String" resultMap="tuitionMap"> -->
+
+<!--  	select t.tui_cost, t.tui_pay_yn, -->
+<!--     to_char(dp.div_pay_st_date,'yyyy-mm-dd') div_pay_st_date, -->
+<!--     to_char(dp.div_pay_en_date,'yyyy-mm-dd') div_pay_en_date -->
+<!--     from tuition t INNER join div_pay_term dp -->
+<!--     on t.semester = dp.semester -->
+<!--     and t.year = dp.year -->
+<!--     and t.st_no = #{stNo} -->
+<!--     and t.year = (select max(year) from tuition) -->
+<!--     and t.semester =  (select max(semester) from tuition) -->
+<!--     and dp.div_pay_sq != 0 -->
+<!--     and t.tui_pay_yn = 'N' -->
+
+<!-- </select> -->
+
+<!-- 부분 납부 단순 조회 현재 날짜 학기 기준-->
+<select id="partview" parameterType="tuitionVO" resultType="kr.or.ddit.vo.TuitionVO">
+   select a.semester, a.year, a.st_no, a.tui_cost, a.tui_pay_yn, a.div_pay_st_date, a.div_pay_en_date, a.scol_amount
+   , b.div_pay_sq, b.div_pay_amount, b.div_pay_date, b.scol_amount, b.div_changes
+   from
+    (SELECT T.SEMESTER, T.YEAR, T.ST_NO, t.tui_cost, t.tui_pay_yn,
+	to_char(dpt.div_pay_st_date,'yyyy-mm-dd') div_pay_st_date,
+	to_char(dpt.div_pay_en_date,'yyyy-mm-dd') div_pay_en_date,
+    (SELECT NVL(MAX(H.SCOL_AMOUNT),0)  FROM SCOLARSHIP_HISTORY H 
+    WHERE  H.ST_NO = T.ST_NO
+    AND      H.SEMESTER = T.SEMESTER
+    AND      H.YEAR = T.YEAR
+    and to_char(sysdate,'yyyy') = to_char(h.year)
+    and  H.SEMESTER = (
+    case when substr(to_char(dpt.div_pay_en_date),6,2)  in ('01','02','03','04','05','06') then '1' 
+    when substr(to_char(dpt.div_pay_en_date),6,2) in ('07','08','09','10','11','12') then '2' end
+    )
+    and H.scol_method != '계좌지급' and h.scol_hi_yn = 'N') SCOL_AMOUNT,
+    DPT.DIV_PAY_SQ
+	FROM TUITION T, DIV_PAY_TERM DPT
+	WHERE DPT.YEAR = T.YEAR
+    and t.tui_pay_yn = 'N'
+	AND DPT.SEMESTER = T.SEMESTER
+	AND DPT.DIV_PAY_SQ != '0'
+	AND T.ST_NO = #{stNo}) a left outer join tuition_div_pay b
+    on a.semester = b.semester and
+    a.year = b.year
+    and a.st_no = b.st_no
+    and a.st_no = #{stNo}
+    AND a.div_pay_sq = b.div_pay_sq
+
+</select>
+
+<!-- 단과 대학 이름 조회 -->
+<select id="deptcode" resultType="kr.or.ddit.vo.ComCodeVO">
+
+    select com_code_name
+    from com_code
+    where com_code_name like '%대학%'
+
+
+</select>
+
+
+<!-- 학과 이름 조회 -->
+<select id="deptname" resultType="kr.or.ddit.vo.ComDetCodeVO">
+
+select com_det_code_name 
+from com_det_code
+where com_det_code like 'D%'
+order by com_det_code_name asc
+
+</select>
+
+<!-- 등록금 고지 목록 조회 (학과 이름 포함) -->
+<select id="deptlist" parameterType="hashMap" 
+resultType="kr.or.ddit.vo.DeptTuitionPayVO">
+
+
+<!-- 	SELECT T.* FROM -->
+<!-- 	( -->
+<!-- 	SELECT ROW_NUMBER() OVER(ORDER BY dp.year DESC, dp.semester desc) RNUM, -->
+<!--     cd.com_det_code_name, dp.year, dp.dept_tui_pay, dp.semester, -->
+<!--     to_char(dp.div_pay_st_date,'yyyy-mm-dd') div_pay_st_date,  -->
+<!--     to_char(dp.div_pay_en_date,'yyyy-mm-dd') div_pay_en_date -->
+<!--     FROM dept_tuition_pay DP, com_det_code CD -->
+<!--     WHERE 1=1 -->
+<!--     and dp.dept_code = cd.com_det_code  -->
+<!--     AND cd.com_det_code_name = #{comDetCodeName} -->
+<!-- 	) T -->
+<!-- 	WHERE T.RNUM BETWEEN ((#{currentPage} * 10) - (10 - 1)) AND (#{currentPage} * 10) -->
+
+    SELECT P.RNUM, P.* FROM
+    (SELECT T.*,  DPT.DIV_PAY_ST_DATE, DPT.DIV_PAY_EN_DATE
+    FROM
+	(
+	SELECT ROW_NUMBER() OVER(ORDER BY dp.year DESC, dp.semester desc) RNUM,
+    cd.com_det_code_name, dp.year, dp.dept_tui_pay, dp.semester
+    FROM dept_tuition_pay DP, com_det_code CD
+    WHERE 1=1
+    and dp.dept_code = cd.com_det_code 
+    AND cd.com_det_code_name = #{comDetCodeName}
+	) T, div_pay_term DPT
+    WHERE T.YEAR = DPT.YEAR
+    AND T.SEMESTER = DPT.SEMESTER
+    AND DPT.DIV_PAY_SQ = (SELECT MIN(DIV_PAY_SQ) AS DIV_PAY_SQ FROM div_pay_term)) P
+    WHERE P.RNUM BETWEEN ((#{currentPage} * 10) - (10 - 1)) AND (#{currentPage} * 10)
+    order by P.RNUM asc
+
+
+</select>
+
+<!-- 전체 행수 -->
+<select id="getTotal" parameterType="hashMap" resultType="int">
+
+SELECT count(*) 
+FROM
+(SELECT ROW_NUMBER() OVER(ORDER BY cd.com_det_code_name DESC) RNUM,
+cd.com_det_code_name, dp.year, dp.dept_tui_pay, dp.semester
+FROM dept_tuition_pay DP, com_det_code CD
+WHERE 1=1
+and dp.dept_code = cd.com_det_code 
+AND cd.com_det_code_name =  #{comDetCodeName}
+ORDER BY DP.YEAR DESC, dp.semester DESC) T
+
+</select>
+
+<select id="getTotal2" parameterType="hashMap" resultType="int">
+SELECT COUNT(*) 
+FROM
+(SELECT tuition.semester, tuition.year, tuition.tui_cost, tuition.st_no, 
+tuition.tui_schedule, tuition.tui_pay_yn,
+NVL(TO_CHAR(tuition_pay.tui_pay_date, 'YYYY-MM-DD'),'미납') tui_pay_date,
+tuition_pay.tui_pay_amount, tuition_pay.tui_pay_re_amount, 
+tuition_pay.scol_d_no, tuition_pay.tui_pay_install_yn, tuition_pay.dept_code,
+tuition_div_pay.div_pay_sq, tuition_div_pay.scol_amount, 
+tuition_div_pay.div_pay_amount, 
+to_char(tuition_div_pay.div_pay_date,'yyyy-mm-dd') div_pay_date, 
+tuition_div_pay.div_changes,
+scolarship_history.scol_method, scolarship.scolarship_ratio, 
+scolarship_history.scol_hi_yn,
+user_info.USER_NAME, COM_DET_CODE.COM_DET_CODE_NAME,
+ROW_NUMBER() OVER(ORDER BY tuition.year desc, tuition.semester desc, user_info.USER_NAME ASC) RNUM
+from tuition left outer join tuition_pay 
+on tuition.st_no = tuition_pay.st_no
+and tuition.year = tuition_pay.year
+and tuition.semester = tuition_pay.semester
+    	left outer join tuition_div_pay on tuition_div_pay.st_no = tuition_pay.st_no
+    and tuition_div_pay.year = tuition_pay.year
+    and tuition_div_pay.semester = tuition_pay.semester
+	    left outer join scolarship_history
+	    on tuition_pay.scol_d_no = scolarship_history.scol_d_no
+    and tuition_pay.st_no = scolarship_history.st_no
+    and scolarship_history.year = tuition_pay.year
+    and scolarship_history.semester = tuition_pay.semester
+	    left outer join scolarship
+	    on scolarship_history.scol_code = scolarship.scol_code
+        AND scolarship_history.st_no = tuition_pay.st_no
+        INNER JOIN 
+        STUDENT S
+        ON  tuition.ST_NO = S.ST_NO
+        INNER JOIN user_info ON tuition.ST_NO = user_info.USER_NO
+        INNER JOIN com_det_code ON S.DEPT_CODE = com_det_code.COM_DET_CODE
+        AND COM_DET_CODE.COM_DET_CODE_NAME = #{comDetCodeName}
+<!--         WHERE tuition.tui_pay_yn = 'Y'         -->
+        ) T
+<!--         WHERE T.RNUM BETWEEN ((#{currentPage} * 10) - (10 - 1)) AND (#{currentPage} * 10) -->
+
+</select>
+
+
+<insert id="tuiinsert" parameterType="DeptTuitionPayVO">
+
+    insert into
+    dept_tuition_pay
+    values(
+    #{deptCode},
+    #{year},
+    #{deptTuiPay},
+    #{semester}
+    )
+
+
+</insert>
+
+
+
+</mapper>

@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.AchMapper"> 
+	<!-- -->
+	<resultMap type="StuLectureVO" id="StuLectureVOListMap">
+		<result property="stuLecNo" column="STU_LEC_NO" />
+		<result property="lecNo" column="LEC_NO" />
+		<result property="stNo" column="ST_NO" />
+		<result property="evalYn" column="eval_yn" />
+		<result property="exepYn" column="exep_yn" />
+		<association property="lectureVOList" resultMap="lectureVOMap"></association>
+		<association property="userInfoVO" resultMap="userInfoVOMap"></association>
+		<association property="achievementVO" resultMap="achievementVOMap"></association>
+	</resultMap> 
+	<!-- -->
+	<resultMap type="AchievementVO" id="achievementVOMap">
+		<result property="stuLecNo" column="STU_LEC_NO" />
+		<result property="achieveScore" column="ACHIEVE_SCORE" />
+		<result property="achieveGrade" column="ACHIEVE_GRADE" />
+		<result property="lecYn" column="LEC_YN" />
+	</resultMap> 
+	
+	<!-- -->
+	<resultMap type="LectureVO" id="lectureVOMap">
+		<result property="lecNo" column="LEC_NO" />
+		<result property="lecName" column="LEC_NAME" />
+		<result property="lecScore" column="LEC_SCORE" />
+		<result property="lecDiv" column="LEC_DIV" />
+		<result property="lecSemester" column="LEC_SEMESTER" />
+		<result property="lecYear" column="LEC_YEAR" />
+	</resultMap> 
+	
+	<!-- user info -->
+	<resultMap type="UserInfoVO" id="userInfoVOMap">
+		<result property="userNo" column="USER_NO" />
+		<result property="userName" column="USER_NAME" />
+		<result property="userPass" column="USER_PASS" />
+		<result property="userTel" column="USER_TEL" />
+		<result property="userGubun" column="USER_GUBUN" />
+		<result property="enabled" column="ENABLED" />
+	</resultMap> 
+	
+	<!-- ach_exeption -->
+	<resultMap type="AchExeptionVO" id="achExeptionVOListMap">
+		<result property="stuLecNo" column="STU_LEC_NO"/>
+		<result property="achExeptionCon" column="ACH_EXEPTION_CON"/>
+		<result property="achExeptionBefore" column="ACH_EXEPTION_BEFORE"/>
+		<result property="achExeptionAfter" column="ACH_EXEPTION_AFTER"/>
+		<result property="achExeptionDate" column="ACH_EXEPTION_DATE"/>
+		<result property="achExepStat" column="ACH_EXEP_STAT"/>
+		<result property="achExepAppDate" column="ACH_EXEP_APP_DATE"/>
+		<result property="achExepAns" column="ACH_EXEP_ANS"/>
+		<association property="lectureVO" resultMap="lectureVOMap"></association>
+	</resultMap>
+	
+	
+	<select id="appScore" parameterType="String" resultType="int"> 
+		select
+			nvl(sum(l.lec_score),0) appScore 
+		from lecture l 
+		join stu_lecture s 
+		on
+			l.lec_no = s.lec_no 
+		where s.st_no = #{stNo} 
+		and l.lec_year = to_char(sysdate, 'YYYY') 
+		AND ( 
+			 (TO_CHAR(SYSDATE, 'MM') BETWEEN '03' AND '07' AND L.LEC_SEMESTER = '1') 
+			OR   
+			(TO_CHAR(SYSDATE, 'MM') BETWEEN '08' AND '12' AND L.LEC_SEMESTER = '2') 
+			OR (TO_CHAR(SYSDATE, 'MM') BETWEEN '01' AND '02' AND L.LEC_SEMESTER = '2') 
+		)
+		and stu_lec_del_yn = 'N'
+	</select> 
+	
+	<select id="achScore" parameterType="String" resultType="int"> 
+	SELECT
+		nvl(SUM(l.lec_score),0) AS total_lec_score 
+	FROM lecture l 
+	JOIN stu_lecture sl
+	ON l.lec_no = sl.lec_no 
+	JOIN achievement a 
+	ON sl.stu_lec_no =a.stu_lec_no 
+	WHERE 
+		sl.st_no = #{stNo} 
+	AND 
+		a.achieve_score != 0 
+	and
+		l.lec_year = to_char(sysdate, 'YYYY') 
+	AND ( 
+			(TO_CHAR(SYSDATE, 'MM') BETWEEN '03' AND '07' AND L.LEC_SEMESTER = '1') 
+		OR (TO_CHAR(SYSDATE, 'MM') BETWEEN '08' AND '12' AND L.LEC_SEMESTER = '2') 
+		OR (TO_CHAR(SYSDATE, 'MM') BETWEEN '01' AND '02' AND L.LEC_SEMESTER = '2') 
+		) 
+	and stu_lec_del_yn = 'N'
+	</select> 
+	
+	<select id="ttAvg" parameterType="String" resultType="int"> 
+	select
+		nvl(avg(middle_test_score+end_test_score+(10-COALESCE(AT.SCORE,0)-COALESCE(B.SCORE,0))),0) ttAvg 
+	from stu_test_res STR 
+	left join 
+		( SELECT 
+			stu_lec_no, COUNT(*) AS SCORE 
+		  FROM 
+		  	attendance 
+		  WHERE 
+		  	ATT_CODE = 'AD00104' 
+		  GROUP BY
+			stu_lec_no 
+		) AT ON STR.stu_lec_no = AT.stu_lec_no 
+	left JOIN ( 
+		SELECT
+			stu_lec_no
+		  , TRUNC(COUNT(*) / 3) AS SCORE 
+		FROM 
+			attendance 
+		WHERE
+			ATT_CODE = 'AD00103' 
+		GROUP BY stu_lec_no 
+		) B ON STR.stu_lec_no = B.stu_lec_no 
+	left join 
+		stu_lecture sl 
+	on str.stu_lec_no = sl.stu_lec_no 
+	left join 
+		lecture l 
+	on sl.lec_no = l.lec_no 
+	where st_no = #{stNo} 
+	and l.lec_year = to_char(sysdate, 'YYYY') 
+	AND (
+		(TO_CHAR(SYSDATE, 'MM') BETWEEN '03' AND '07' AND L.LEC_SEMESTER ='1') 
+	 OR (TO_CHAR(SYSDATE, 'MM') BETWEEN '08' AND '12' AND L.LEC_SEMESTER = '2') 
+		) 
+	and stu_lec_del_yn = 'N'
+	</select> 
+	
+	<select id="avgAch" parameterType="String" resultType="String"> 
+	select
+		to_char(round(avg(achieve_score),2)) aheScore 
+	from 
+		achievement ach
+	left join stu_lecture sl 
+	on 
+		ach.stu_lec_no = sl.stu_lec_no 
+	left join
+		lecture l on sl.lec_no = l.lec_no 
+	where sl.st_no = #{stNo} 
+	and
+		l.lec_year = to_char(sysdate, 'YYYY') 
+	AND ( 
+		(TO_CHAR(SYSDATE, 'MM') BETWEEN '03' AND '07' AND L.LEC_SEMESTER = '1') OR 
+		(TO_CHAR(SYSDATE, 'MM') BETWEEN '08' AND '12' AND L.LEC_SEMESTER = '2') 
+		) 
+	and stu_lec_del_yn = 'N'
+	</select> 
+	
+	<select id="percentage" parameterType="String" resultType="int">
+		select 
+			case 
+			<![CDATA[ 
+				when 
+					avgscore.achieve_score>=4.4 
+				then 
+					100-(4.5-avgscore.achieve_score)*20 
+				when 
+					avgscore.achieve_score<4.4 
+				then 
+					98-(4.4-avgscore.achieve_score)*10 
+				when
+		            avgscore.achieve_score is null
+		        then
+		            0
+			]]>
+			end percentage 
+		from ( 
+			select 
+				avg(achieve_score) achieve_score 
+			from
+				achievement ach 
+			left join 
+				stu_lecture sl 
+			on 
+				ach.stu_lec_no = sl.stu_lec_no 
+			left join 
+				lecture l 
+			on 
+				sl.lec_no = l.lec_no 
+			where
+				sl.st_no = #{stNo} 
+			and l.lec_year = to_char(sysdate, 'YYYY') 
+			AND (
+					(TO_CHAR(SYSDATE, 'MM') BETWEEN '03' AND '07' AND L.LEC_SEMESTER = '1') OR 
+					(TO_CHAR(SYSDATE, 'MM') BETWEEN '08' AND '12' AND L.LEC_SEMESTER = '2') 
+				)
+			and stu_lec_del_yn = 'N'
+			) avgScore
+	</select> 
+	
+	<select id="rank" parameterType="String" resultType="hashMap">
+		-- Step 1
+			WITH st_info AS ( 
+			    SELECT dept_code, st_grade 
+			    FROM student 
+			    WHERE st_no = #{stNo}
+			), 
+			-- Step 2
+			same_dept_grade_students AS ( 
+			    SELECT st_no 
+			    FROM student 
+			    WHERE dept_code = (SELECT dept_code FROM st_info) 
+			    AND st_grade = (SELECT st_grade FROM st_info) 
+			), 
+			-- Step 3 
+			students_avg_score AS ( 
+			    SELECT 
+			        s.st_no, 
+			        CASE 
+			        <![CDATA[ 
+			            WHEN AVG(achieve_score) >= 4.4 THEN 100 - (4.5 - AVG(achieve_score)) * 20 
+			            WHEN AVG(achieve_score) < 4.4 THEN 98 - (4.4 - AVG(achieve_score)) * 10 
+			        ]]>
+			        END AS percentage 
+			    FROM achievement ach 
+			    LEFT JOIN stu_lecture sl ON ach.stu_lec_no = sl.stu_lec_no 
+			    LEFT JOIN lecture l ON sl.lec_no = l.lec_no 
+			    LEFT JOIN student s ON sl.st_no = s.st_no 
+			    WHERE s.st_no IN (SELECT st_no FROM same_dept_grade_students) 
+			    AND l.lec_year = TO_CHAR(SYSDATE, 'YYYY') 
+			    AND ( 
+			        (TO_CHAR(SYSDATE, 'MM') BETWEEN '03' AND '07' AND l.lec_semester = '1') 
+			        OR (TO_CHAR(SYSDATE, 'MM') BETWEEN '08' AND '12' AND l.lec_semester = '2') 
+			    ) 
+			    GROUP BY s.st_no 
+			) 
+			-- Step 4 
+			SELECT 
+			    NVL(r.rank, 0) AS rank, 
+			    NVL(cnt.count, 0) AS count
+			FROM 
+			( 
+			    SELECT s.st_no, 
+			           s.percentage,
+			           RANK() OVER (ORDER BY s.percentage DESC) AS rank 
+			    FROM students_avg_score s 
+			) r
+			LEFT JOIN 
+			( 
+			    SELECT COUNT(*) AS count 
+			    FROM students_avg_score 
+			) cnt ON 1=1
+			WHERE r.st_no = #{stNo}
+			UNION ALL
+			SELECT 0 AS rank, 0 AS count 
+			FROM DUAL
+			WHERE NOT EXISTS (
+			    SELECT 1
+			    FROM students_avg_score s
+			    WHERE s.st_no = #{stNo}
+			)
+	</select> 
+	
+	<select id="stuLectureVOList" parameterType="String" resultMap="StuLectureVOListMap"> 
+		SELECT 
+			s.stu_lec_no
+		  , l.lec_name
+		  , l.lec_score
+		  , l.lec_div
+		  , l.lec_year
+		  , l.lec_semester
+		  , u.user_name
+		  , nvl(a.achieve_grade,'') achieve_grade
+		  , CASE 
+		  		WHEN le.stu_lec_no IS NOT NULL THEN 'Y' 
+		  		ELSE 'N'
+			END AS eval_yn
+		  , CASE
+		        WHEN ae.stu_lec_no IS NOT NULL THEN 'Y'
+		        ELSE 'N'
+		    END AS exep_yn
+		FROM stu_lecture s 
+		LEFT JOIN lecture l ON s.lec_no = l.lec_no 
+		LEFT JOIN user_info u on l.pro_no=u.user_no 
+		LEFT JOIN achievement a ON s.stu_lec_no = a.stu_lec_no 
+		LEFT JOIN 
+			(SELECT DISTINCT stu_lec_no FROM lec_evaluation) le ON s.stu_lec_no = le.stu_lec_no
+		LEFT JOIN ach_exeption ae ON s.stu_lec_no = ae.stu_lec_no 
+		WHERE s.st_no = #{stNo}
+		AND s.stu_lec_del_yn = 'N'
+		AND l.lec_year = TO_CHAR(SYSDATE, 'YYYY') 
+		AND ( 
+			(TO_CHAR(SYSDATE, 'MM') BETWEEN '03' AND '07' AND l.lec_semester = '1') 
+			OR (TO_CHAR(SYSDATE, 'MM') BETWEEN '08' AND '12' AND l.lec_semester = '2') 
+			OR (TO_CHAR(SYSDATE, 'MM') BETWEEN '01' AND '02' AND l.lec_semester = '2') 
+			) 
+		and stu_lec_del_yn = 'N'
+	</select> 
+	
+	<select id="evalStuLectureVO" parameterType="String" resultMap="StuLectureVOListMap"> 
+		select 
+			s.stu_lec_no 
+		  , l.lec_no 
+		  , l.lec_name 
+		  , l.lec_year 
+		  , l.lec_semester 
+		  , u.user_name 
+		  , a.achieve_grade 
+		from stu_lecture s 
+		left join lecture l on s.lec_no = l.lec_no 
+		left join user_info u on l.pro_no = u.user_no 
+		left join achievement a on s.stu_lec_no = a.stu_lec_no 
+		where
+			s.stu_lec_no = #{stuLecNo} 
+	</select> 
+	
+	<select id="lecEvaluationVOList" resultType="LecEvalItemVO"> 
+		SELECT
+			lec_eval_item_no 
+		  , lec_eval_item_con 
+		FROM 
+			lec_eval_item 
+	</select>
+	
+	<insert id="lecEvaluationCreate" parameterType="LecEvaluationVO"> 
+		INSERT INTO
+			lec_evaluation ( stu_lec_no , lec_eval_item_no , lec_eval_score )
+		VALUES ( 
+			#{stuLecNo} 
+		  , #{lecEvalItemNo} 
+		  , #{lecEvalScore} 
+		  ) 
+	</insert>
+	
+	<insert id="lecExeptionCreate" parameterType="AchExeptionVO">
+		INSERT INTO ach_exeption (
+		    stu_lec_no
+		    , ach_exeption_con
+		    , ach_exeption_before
+		    , ach_exeption_after
+		    , ach_exeption_date
+		    , ach_exep_stat
+		    , ach_exep_app_date
+		) VALUES (
+		    #{stuLecNo}
+		  , #{achExeptionCon}
+		  , #{achExeptionBefore}
+		  , #{achExeptionBefore}
+		  , sysdate
+		  , '대기'
+		  , sysdate
+		)
+	</insert>
+	
+	<select id="achExeptionVOList" parameterType="String" resultMap="achExeptionVOListMap">
+		SELECT
+		    ae.stu_lec_no
+		  , ach_exeption_con
+		  , ach_exeption_before
+		  , ach_exeption_after
+		  , ach_exeption_date
+		  , ach_exep_stat
+		  , ach_exep_app_date
+		  , ach_exep_ans
+		  , l.lec_name
+		  , l.lec_score
+		  , l.lec_div
+		  , l.lec_year
+  		  , l.lec_semester
+  		  , u.user_name
+		FROM
+		    ach_exeption ae
+		LEFT JOIN stu_lecture sl on ae.stu_lec_no = sl.stu_lec_no
+		LEFT JOIN lecture l on sl.lec_no = l.lec_no
+		LEFT JOIN user_info u on l.pro_no = u.user_no
+		WHERE sl.st_no = #{stNo}
+		AND ( 
+		        (TO_CHAR(SYSDATE, 'MM') BETWEEN '03' AND '07' AND L.LEC_SEMESTER = '1') 
+		        OR (TO_CHAR(SYSDATE, 'MM') BETWEEN '08' AND '12' AND L.LEC_SEMESTER = '2') 
+		        OR (TO_CHAR(SYSDATE, 'MM') BETWEEN '01' AND '02' AND L.LEC_SEMESTER = '2') 
+		    )
+	</select>
+	
+	<update id="lecExUpd" parameterType="AchExeptionVO">
+		UPDATE ach_exeption
+		SET
+		    ach_exeption_con = #{achExeptionCon}
+		WHERE
+		    stu_lec_no = #{stuLecNo}
+	</update>
+	
+	<delete id="lecExDel" parameterType="String">
+		DELETE FROM ach_exeption
+		WHERE
+		    stu_lec_no = #{stuLecNo}
+	</delete>
+</mapper>

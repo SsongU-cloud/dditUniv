@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.MainPageMapper">
+	<select id="getNoticeList" resultType="CommonNoticeVO">
+		 <![CDATA[
+		    SELECT com_not_no
+			    , com_not_name
+			    , to_char(com_first_date, 'YYYY-MM-DD') com_first_date
+			    , com_gubun 
+			FROM (
+			    SELECT com_not_no
+			        , com_not_name
+			        , com_first_date
+			        , com_gubun 
+			    FROM common_notice
+			    ORDER BY TO_NUMBER(com_not_no) DESC
+			)
+			WHERE ROWNUM <= 5
+		    ]]>
+	</select>
+</mapper>

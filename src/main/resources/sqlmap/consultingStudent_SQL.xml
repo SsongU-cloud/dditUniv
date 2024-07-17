@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.ConsultingStudentMapper">
+
+	<sql id="where">
+		<if test="keyword!=null and keyword!=''">
+			<choose>
+<!-- 				<option value="1" selected="selected">학번</option> -->
+<!--                <option value="2">이름</option> -->
+<!--                <option value="3">구분</option> -->
+<!--                <option value="4">상담기록</option> -->
+				<!-- 학번 -->
+				<when test="queGubun == 1">
+					and (C.ST_NO LIKE '%' || #{keyword} || '%')
+				</when>
+				<!-- 이름 -->
+				<when test="queGubun == 2">
+					and (U.USER_NAME LIKE '%' || #{keyword} || '%')
+				</when>
+				<!-- 구분 -->
+				<when test="queGubun == 3">
+					and (C.CONSUL_CATEG LIKE '%' || #{keyword} || '%')
+				</when>
+				<!-- 상담현황 -->
+				<when test="queGubun == 4">
+					and (C.CONSUL_REQ_CONDITION LIKE '%' || #{keyword} || '%')
+				</when>
+			</choose>		
+		</if>
+	</sql>
+	
+	<!-- 상담신청현황  consulting request-->
+	<resultMap type="ConsultingRequestVO" id="consultingRequestVOMap">
+		<result property="rn" column="rn"/>
+		<result property="conrqNo" column="conrqNo"/>
+		<result property="dayAndTime" column="dayAndTime"/>
+		<result property="consulReqNo" column="CONSUL_REQ_NO"/>
+		<result property="stNo" column="ST_NO"/>
+		<result property="consulReqDate" column="CONSUL_REQ_DATE"/>
+		<result property="consulReqCondition" column="CONSUL_REQ_CONDITION"/>
+		<result property="consulTitle" column="CONSUL_TITLE"/>
+		<result property="consulCon" column="CONSUL_CON"/>
+		<result property="consulReqTime" column="CONSUL_REQ_TIME"/>
+		<result property="consulCateg" column="CONSUL_CATEG"/>
+		<collection property="userInfoVOMap" resultMap="userInfoVOMap"></collection>
+		<collection property="consultingRecordVOMap" resultMap="consultingRecordVOMap"></collection>
+		<collection property="studentVOMap" resultMap="studentVOMap"></collection>
+		<collection property="professorVOMap" resultMap="professorVOMap"></collection>
+	</resultMap>
+	
+	<!-- 상담내역 consulting record-->
+	<resultMap type="ConsultingRecordVO" id="consultingRecordVOMap">
+		<result property="conNo" column="CON_NO"/>
+		<result property="conReqNo" column="CON_REQ_NO"/>
+		<result property="proNo" column="PRO_NO"/>
+		<result property="conCont" column="CON_CONT"/>
+	</resultMap>
+	
+	<!-- 사용자관리 -->
+	<resultMap type="UserInfoVO" id="userInfoVOMap">
+		<result property="userNo" column="USER_NO"/>
+		<result property="userName" column="USER_NAME"/>
+		<result property="userPass" column="USER_PASS"/>
+		<result property="userTel" column="USER_TEL"/>
+		<result property="userGubun" column="USER_GUBUN"/>
+		<result property="enabled" column="ENABLED"/>
+	</resultMap>
+	
+	<!-- 학생관리 -->
+	<resultMap type="StudentVO" id="studentVOMap">
+		<result property="stSemester" column="ST_SEMESTER"/>
+		<result property="stGrade" column="ST_GRADE"/>
+		<result property="deptCode" column="DEPT_CODE"/>
+		<result property="stGradDate" column="ST_GRAD_DATE"/>
+		<result property="admissionDate" column="ADMISSION_DATE"/>
+		<result property="proChaNo" column="PRO_CHA_NO"/>
+		<result property="stEmail" column="ST_EMAIL"/>
+		<result property="militaryService" column="MILITARY_SERVICE"/>
+		<result property="stBank" column="ST_BANK"/>
+		<result property="stAcount" column="ST_ACOUNT"/>
+		<result property="stAddrDet" column="ST_ADDR_DET"/>
+		<result property="stAddr" column="ST_ADDR"/>
+		<result property="stPostno" column="ST_POSTNO"/>
+		<result property="stGender" column="ST_GENDER"/>
+		<result property="stNo" column="ST_NO"/>
+	</resultMap>
+	
+	<!-- 교수관리 -->
+	<resultMap type="ProfessorVO" id="professorVOMap">
+		<result property="proNo" column="PRO_NO"/>
+		<result property="proAddr" column="PRO_ADDR"/>
+		<result property="empDate" column="EMP_DATE"/>
+		<result property="salary" column="SALARY"/>
+		<result property="deptCode" column="DEPT_CODE"/>
+		<result property="proStudy" column="PRO_STUDY"/>
+		<result property="proAddrDet" column="PRO_ADDR_DET"/>
+		<result property="proPostno" column="PRO_POSTNO"/>
+		<result property="proWorkYn" column="PRO_WORK_YN"/>
+		<result property="proRetireDate" column="PRO_RETIRE_DATE"/>
+		<result property="proPosition" column="PRO_POSITION"/>
+		<result property="comAttMId" column="COM_ATT_M_ID"/>
+		<result property="proEmail" column="PRO_EMAIL"/>
+	</resultMap>
+	
+	<!-- 상담 신청 조회 -->
+	<select id="getTotal" parameterType="hashMap" resultType="int">
+		SELECT COUNT(*)
+		FROM CONSULTING_REQUEST
+		WHERE 1=1
+		<include refid="where"></include>
+	</select>
+	
+	<!-- 상담 신청 조회 -->
+	<select id="list" parameterType="hashMap" resultMap="consultingRequestVOMap">
+		SELECT Y.* 
+		FROM (
+			SELECT  ROWNUM RN, T.*
+			FROM (
+                SELECT 
+                    C.CONSUL_REQ_NO
+	               ,C.ST_NO
+	               ,TO_CHAR((C.CONSUL_REQ_DATE), 'YYYY-MM-DD') CONSUL_REQ_DATE
+	               ,C.CONSUL_REQ_CONDITION
+	               ,C.CONSUL_TITLE
+	               ,C.CONSUL_CON
+	               ,C.CONSUL_REQ_TIME
+	               ,C.CONSUL_CATEG
+                   ,U.USER_NAME
+                   ,P.PRO_NO
+                FROM     CONSULTING_REQUEST C LEFT OUTER JOIN STUDENT S
+                                                    ON(C.ST_NO = S.ST_NO)
+                                              LEFT OUTER JOIN USER_INFO U 
+                                                    ON(C.ST_NO = U.USER_NO)     
+                                              LEFT OUTER JOIN PROFESSOR P
+                                                    ON(P.PRO_NO = S.PRO_CHA_NO)
+                WHERE P.PRO_NO = #{proNo}
+                ORDER BY TO_NUMBER(CONSUL_REQ_NO) DESC
+			) T 
+		) Y
+		WHERE Y.RN BETWEEN ((#{currentPage} * 10)-(10-1)) AND (#{currentPage} * 10)
+	</select>
+	
+	<!-- 상담 수정 -->
+	<update id="updateAjax" parameterType="consultingRequestVO">
+	    UPDATE CONSULTING_REQUEST
+	    SET 
+	        CONSUL_REQ_CONDITION = #{consulReqCondition}
+	    WHERE CONSUL_REQ_NO = #{consulReqNo}
+	</update>
+	
+	
+	<!-- ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+	
+	<!-- 상담 내역 -->
+	<select id="getTotalHis" parameterType="hashMap" resultType="int">
+		SELECT COUNT(*)
+		FROM CONSULTING_REQUEST
+		WHERE 1=1
+		<include refid="where"></include>
+	</select>
+	
+	<!-- 상담 내역 -->
+	<select id="listHis" parameterType="hashMap" resultMap="consultingRequestVOMap">
+		SELECT Y.* 
+		FROM (
+			SELECT  ROWNUM RN, T.*
+			FROM (
+                SELECT
+		    R.CON_NO
+		   ,R.CON_REQ_NO
+		   ,R.PRO_NO
+		   ,R.CON_CONT
+		   ,C.CONSUL_REQ_NO
+		   ,C.ST_NO
+		   ,TO_CHAR((C.CONSUL_REQ_DATE), 'YYYY-MM-DD') CONSUL_REQ_DATE
+		   ,C.CONSUL_TITLE
+		   ,C.CONSUL_CON
+		   ,C.CONSUL_REQ_TIME
+		   ,C.CONSUL_CATEG
+		   ,U.USER_NAME
+		FROM
+		    CONSULTING_REQUEST C LEFT OUTER JOIN CONSULTING_RECORD R
+		                             ON(R.CON_REQ_NO = C.CONSUL_REQ_NO)
+		                        LEFT OUTER JOIN STUDENT S
+		                             ON(C.ST_NO = S.ST_NO)
+		                        LEFT OUTER JOIN USER_INFO U 
+		                             ON(C.ST_NO = U.USER_NO)
+                WHERE R.PRO_NO = #{proNo}
+                ORDER BY TO_NUMBER(CONSUL_REQ_NO) DESC
+			) T 
+		) Y
+		WHERE Y.RN BETWEEN ((#{currentPage} * 10)-(10-1)) AND (#{currentPage} * 10)
+	</select>
+	
+	<!-- 상담 내역 (상세) -->
+	<select id="consultstudetail" parameterType="String" resultMap="consultingRequestVOMap">
+ 		SELECT
+			    R.CON_NO
+			   ,R.CON_REQ_NO
+			   ,R.PRO_NO
+			   ,R.CON_CONT
+			   ,C.CONSUL_REQ_NO
+			   ,C.ST_NO
+			   ,TO_CHAR((C.CONSUL_REQ_DATE), 'YYYY-MM-DD') CONSUL_REQ_DATE
+			   ,C.CONSUL_TITLE
+			   ,C.CONSUL_CON
+			   ,C.CONSUL_REQ_TIME
+			   ,C.CONSUL_CATEG
+			   ,U.USER_NAME
+			FROM
+			    CONSULTING_REQUEST C LEFT OUTER JOIN CONSULTING_RECORD R
+			                             ON(R.CON_REQ_NO = C.CONSUL_REQ_NO)
+			                        LEFT OUTER JOIN STUDENT S
+			                             ON(C.ST_NO = S.ST_NO)
+			                        LEFT OUTER JOIN USER_INFO U 
+			                             ON(C.ST_NO = U.USER_NO)
+                WHERE C.CONSUL_REQ_NO = #{consulReqNo}
+ 	</select>
+
+</mapper>

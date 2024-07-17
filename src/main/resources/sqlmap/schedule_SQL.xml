@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="schedule">
+	<select id="getScheduleList" resultType="ScheduleVO">
+		SELECT
+		    sche_no
+		  , sche_name
+		  , to_char(sche_str_date,'YYYY-MM-DD') sche_str_date
+		  , to_char(sche_end_date,'YYYY-MM-DD') sche_end_date
+		  , sche_f_date
+		  , sche_f_writer
+		  , sche_del_yn
+		  , sche_color
+		FROM
+		    schedule
+		WHERE
+		    SCHE_DEL_YN = 'N'
+	</select>
+	
+	<insert id="insertSchedule" parameterType="hashMap">
+	    <selectKey keyProperty="scheNo" resultType="String" order="BEFORE">
+	        SELECT NVL(MAX(TO_NUMBER(sche_no)), 0) + 1 FROM schedule
+	    </selectKey>
+	    INSERT INTO schedule (
+	        sche_no,
+	        sche_name,
+	        sche_str_date,
+	        sche_end_date,
+	        sche_f_date,
+	        sche_f_writer,
+	        sche_color
+	    ) VALUES (
+	        #{scheNo},
+	        #{title},
+	        TO_DATE(#{start}, 'YYYY-MM-DD'),
+	        TO_DATE(#{end}, 'YYYY-MM-DD'),
+	        SYSDATE,
+	        #{userNo},
+	        #{backgroundColor}
+	    )
+	</insert>
+	
+	<update id="deleteSchedule" parameterType="hashMap">
+		UPDATE schedule
+		SET
+		    sche_del_yn = 'Y'
+		WHERE
+	        sche_no = #{scheNo}
+	</update>
+	
+	<select id="getScheNo" resultType="string">
+		SELECT NVL(MAX(TO_NUMBER(sche_no)), 0) FROM schedule
+	</select>
+	
+	<update id="deleteScheduleString" parameterType="String">
+		UPDATE schedule
+		SET
+		    sche_del_yn = 'Y'
+		WHERE
+	        sche_no = #{scheNo}
+	</update>
+</mapper>

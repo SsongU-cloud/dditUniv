@@ -1,0 +1,813 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.TimePostMapper">
+
+	<sql id="where">
+		<if test="keyword!=null and keyword!=''">
+			<choose>
+				<!-- 게시판 구분 -->
+				<when test="queGubun == 1">
+					and (E2.COM_DET_CODE_NAME LIKE '%' || #{keyword} || '%')
+				</when>
+				<!-- 게시글 제목 -->
+				<when test="queGubun == 2">
+					and (D.TIME_DE_TITLE LIKE '%' || #{keyword} || '%')
+				</when>
+				<!-- 작성자 -->
+				<when test="queGubun == 3">
+					and (U.USER_NAME LIKE '%' || #{keyword} || '%')
+				</when>
+				<!-- 신고사유 -->
+				<when test="queGubun == 4">
+					and (E1.COM_DET_CODE_NAME LIKE '%' || #{keyword} || '%')
+				</when>
+			</choose>		
+		</if>
+	</sql>
+	
+	
+ 	<!-- 타임신고내역--> 
+	<resultMap type="timeDeclareVO" id="timeDeclareVOMap">
+		<result property="rn" column="rn"/>
+		<result property="timeDeno" column="TIME_DENO"/>
+		<result property="timeDereason" column="TIME_DEREASON"/>
+		<result property="timeBDiv" column="TIME_B_DIV"/>
+		<result property="timeDeBNo" column="TIME_DE_B_NO"/>
+		<result property="timeDeUrl" column="TIME_DE_URL"/>
+		<result property="timeDeId" column="TIME_DE_ID"/>
+		<result property="timeDeTitle" column="TIME_DE_TITLE"/>
+		<result property="timeDeDate" column="TIME_DE_DATE"/>
+		<collection property="userInfoVOMap" resultMap="userInfoVOMap"></collection>
+		<collection property="comCodeVOMap" resultMap="comCodeVOMap"></collection>
+		<collection property="comDetCodeVOMap" resultMap="comDetCodeVOMap"></collection>
+	</resultMap>
+	
+	
+ 	<!-- 사용자 관리 -->
+	<resultMap type="userInfoVO" id="userInfoVOMap">
+		<result property="userNo" column="USER_NO"/>
+		<result property="userName" column="USER_NAME"/>
+		<result property="userPass" column="USER_PASS"/>
+		<result property="userTel" column="USER_TEL"/>
+		<result property="userGubun" column="USER_GUBUN"/>
+		<result property="enabled" column="ENABLED"/>
+	</resultMap>
+	
+ 	<!-- 공통분류코드 -->
+	<resultMap type="ComCodeVO" id="comCodeVOMap">
+		<result property="comCode" column="COM_CODE"/>
+		<result property="comCodeName" column="COM_CODE_NAME"/>
+		<result property="comCodeContent" column="COM_CODE_CONTENT"/>
+		<result property="comCodeUseYn" column="COM_CODE_USE_YN"/>
+	</resultMap>
+
+	<!-- 공통상세코드 -->
+	<resultMap type="ComDetCodeVO" id="comDetCodeVOMap">
+		<result property="comDetCode" column="COM_DET_CODE"/>
+		<result property="comDetCodeName" column="COM_DET_CODE_NAME"/>
+		<result property="comDetUseYn" column="COM_DET_USE_YN"/>
+		<result property="comCode" column="COM_CODE"/>
+		
+		<result property="comDetCode1" column="COM_DET_CODE1"/>
+		<result property="comDetCodeName1" column="COM_DET_CODE_NAME1"/>
+		<result property="comDetUseYn1" column="COM_DET_USE_YN1"/>
+		<result property="comCode1" column="COM_CODE1"/>
+		
+		<result property="comDetCode2" column="COM_DET_CODE2"/>
+		<result property="comDetCodeName2" column="COM_DET_CODE_NAME2"/>
+		<result property="comDetUseYn2" column="COM_DET_USE_YN2"/>
+		<result property="comCode2" column="COM_CODE2"/>
+	</resultMap>
+	
+		
+ 	<!-- 조건을 포함한 전체 레코드 수 조회 --> 
+	<select id="getTotal" parameterType="hashMap" resultType="int">
+		SELECT COUNT(*)
+		FROM TIME_DECLARE D 
+			INNER JOIN USER_INFO U ON(D.TIME_DE_ID = U.USER_NO)
+			INNER JOIN COM_DET_CODE E1 ON (D.TIME_DEREASON = E1.COM_DET_CODE)
+            INNER JOIN COM_DET_CODE E2 ON (D.TIME_B_DIV = E2.COM_DET_CODE)
+		WHERE 1=1
+		<include refid="where"></include>
+	</select>
+	
+	
+	<select id="list" parameterType="hashMap" resultMap="timeDeclareVOMap">
+    SELECT Y.*
+    FROM (
+        SELECT ROWNUM RN, T.*
+        FROM (
+            SELECT 
+                D.TIME_DENO,
+                D.TIME_DEREASON,
+                D.TIME_B_DIV,
+                D.TIME_DE_B_NO,
+                D.TIME_DE_URL,
+                D.TIME_DE_ID,
+                D.TIME_DE_TITLE,
+                TO_CHAR(D.TIME_DE_DATE, 'YYYY-MM-DD') AS TIME_DE_DATE,
+                U.USER_NAME,
+                E1.COM_DET_CODE AS COM_DET_CODE1,
+                E1.COM_DET_CODE_NAME AS COM_DET_CODE_NAME1,
+                E1.COM_DET_USE_YN AS COM_DET_USE_YN1,
+                E1.COM_CODE AS COM_CODE1,
+                E2.COM_DET_CODE AS COM_DET_CODE2,
+                E2.COM_DET_CODE_NAME AS COM_DET_CODE_NAME2,
+                E2.COM_DET_USE_YN AS COM_DET_USE_YN2,
+                E2.COM_CODE AS COM_CODE2
+            FROM
+                TIME_DECLARE D
+                INNER JOIN USER_INFO U ON (D.TIME_DE_ID = U.USER_NO)
+                INNER JOIN COM_DET_CODE E1 ON (D.TIME_DEREASON = E1.COM_DET_CODE)
+                INNER JOIN COM_DET_CODE E2 ON (D.TIME_B_DIV = E2.COM_DET_CODE)
+            WHERE 1 = 1
+            <include refid="where"/>
+            ORDER BY D.TIME_DE_DATE DESC
+        ) T
+    ) Y
+    WHERE Y.RN BETWEEN ((#{currentPage} * 10) - (10 - 1)) AND (#{currentPage} * 10)
+	</select>
+ 
+ <!--                            신고내역 조회_권나현                                                                                    -->
+ <!--                            이수빈 start                                                                             -->
+	<resultMap type="TimeLecutreBoastVO" id="timeLecutreBoastVOMap">
+<!-- 		<result property="rowNum" column="ROWNUM"/> -->
+		<result property="timeLecBoNo" column="TIME_LEC_BO_NO"/>
+		<result property="stNo" column="ST_NO"/>
+		<result property="timeLecBoName" column="TIME_LEC_BO_NAME"/>
+		<result property="timeLecBoCon" column="TIME_LEC_BO_CON"/>
+		<result property="timeViews" column="TIME_VIEWS"/>
+		<result property="timeLecDate" column="TIME_LEC_DATE"/>
+		<result property="timeLecLike" column="TIME_LEC_LIKE"/>
+<!-- 		<result property="timeLecAttFile" column="TIME_LEC_ATT_FILE"/> -->
+		<result property="timeLecAttFileId" column="TIME_LEC_ATT_FILE_ID"/>
+		<result property="timeLecUpdDate" column="TIME_LEC_UPD_DATE"/>
+		<result property="timeLecDelYn" column="TIME_LEC_DEL_YN"/>
+		<association property="studentVO" resultMap="studentVOMap"></association>
+		<association property="userInfoVO" resultMap="userInfoVOMap"></association>
+		<collection property="timeBoastCommVOList" resultMap="timeBoastCommVOMap"></collection>
+		<collection property="timeLectureRecomVOList" resultMap="timeLectureRecomVOMap"></collection>
+	</resultMap>
+	<resultMap type="TimeBoastCommVO" id="timeBoastCommVOMap">
+		<result property="timeBoaCommNo" column="TIME_BOA_COMM_NO"/>
+		<result property="stNo" column="COMM_ST_NO"/>
+		<result property="timeLecBoNo" column="TIME_LEC_BO_NO"/>
+		<result property="timeBoaCommDate" column="TIME_BOA_COMM_DATE"/>
+		<result property="timeBoaCommCon" column="TIME_BOA_COMM_CON"/>
+		<result property="timeBoaCommYn" column="TIME_BOA_COMM_YN"/>	
+		<result property="commentCount" column="COMMENT_COUNT"/>	
+	</resultMap>
+	<resultMap type="TimeLectureRecomVO" id="timeLectureRecomVOMap">
+		<result property="timeNo" column="TIME_NO"/>
+		<result property="stNo" column="Recom_ST_NO"/>
+		<result property="timeLecBoNo" column="TIME_LEC_BO_NO"/>
+	</resultMap>
+	<resultMap type="StudentVO" id="studentVOMap">
+	<result property="stSemester" column="ST_SEMESTER"/>
+		<result property="stGrade" column="ST_GRADE"/>
+		<result property="deptCode" column="DEPT_CODE"/>
+		<result property="stGradDate" column="ST_GRAD_DATE"/>
+		<result property="admissionDate" column="ADMISSION_DATE"/>
+		<result property="proChaNo" column="PRO_CHA_NO"/>
+		<result property="stEmail" column="ST_EMAIL"/>
+		<result property="militaryService" column="MILITARY_SERVICE"/>
+		<result property="stBank" column="ST_BANK"/>
+		<result property="stAcount" column="ST_ACOUNT"/>
+		<result property="stAddrDet" column="ST_ADDR_DET"/>
+		<result property="stAddr" column="ST_ADDR"/>
+		<result property="stPostno" column="ST_POSTNO"/>
+		<result property="stGender" column="ST_GENDER"/>
+		<result property="stNo" column="ST_NO"/>
+	</resultMap>
+
+
+<sql id="whereBoast">
+		<if test="keyword!=null and keyword!=''">
+			<choose>
+				<when test="queGubun == 1">
+					and (TIME_LEC_BO_NAME LIKE '%' || #{keyword} || '%')
+				</when>
+				<when test="queGubun == 2">
+					and (TIME_LEC_DATE LIKE '%' || #{keyword} || '%')
+				</when>
+				<when test="queGubun == 3">
+					and (TIME_VIEWS '%' || #{keyword} || '%')
+				</when>
+				<when test="queGubun == 4">
+					and (TIME_LEC_LIKE '%' || #{keyword} || '%')
+				</when>
+			</choose>		
+		</if>
+	</sql>	 
+	 <select id="getTotalLecBoa" parameterType="hashMap" resultType="int">
+	 	SELECT NVL(COUNT(*),0) 
+	 	FROM TIME_LECUTRE_BOAST 
+	 	WHERE 1=1
+        	AND TIME_LEC_DEL_YN = 'N'
+	 		<include refid="whereBoast"></include> 
+	 </select>
+	 
+	 <select id="timeLecBoastList" parameterType="hashMap" resultMap="timeLecutreBoastVOMap">
+		   SELECT *
+			FROM (
+			    SELECT 
+			        T.*,
+			        ROW_NUMBER() OVER (ORDER BY T.TIME_LEC_DATE DESC) AS RNUM
+			    FROM (
+			        SELECT 
+			            A.TIME_LEC_BO_NO,
+			            A.ST_NO,
+			            A.TIME_LEC_BO_NAME,  
+			            A.TIME_LEC_BO_CON,
+			            A.TIME_VIEWS,
+			            TO_CHAR(A.TIME_LEC_DATE, 'YYYY-MM-DD') AS TIME_LEC_DATE,
+			            (SELECT NVL(COUNT(*), 0) FROM TIME_LECTURE_RECOM WHERE TIME_LEC_BO_NO = A.TIME_LEC_BO_NO) AS TIME_LEC_LIKE,
+			            A.TIME_LEC_ATT_FILE,
+			            TO_CHAR(A.TIME_LEC_UPD_DATE, 'YYYY-MM-DD') AS TIME_LEC_UPD_DATE,
+			            B.ST_GENDER,
+			            B.ST_POSTNO,
+			            B.ST_ADDR,
+			            B.ST_ADDR_DET,
+			            B.ST_ACOUNT,
+			            B.ST_BANK,
+			            B.MILITARY_SERVICE,
+			            B.ST_EMAIL,
+			            B.PRO_CHA_NO,
+			            B.ADMISSION_DATE,
+			            B.ST_GRAD_DATE,
+			            B.DEPT_CODE,
+			            B.ST_GRADE,
+			            B.ST_SEMESTER,
+			            C.USER_NO,
+			            C.USER_NAME
+			        FROM TIME_LECUTRE_BOAST A
+			        JOIN STUDENT B ON A.ST_NO = B.ST_NO
+			        JOIN USER_INFO C ON A.ST_NO = C.USER_NO
+			        WHERE A.TIME_LEC_DEL_YN = 'N'
+			        <include refid="whereBoast"></include>
+			    ) T
+			) 
+			WHERE RNUM BETWEEN ((#{currentPage} * 10)-(10 - 1)) AND (#{currentPage} * 10)
+		   
+	</select>
+
+	 
+	 <update id="lecBoastViewCnt" parameterType="hashMap">
+		 UPDATE TIME_LECUTRE_BOAST
+	    SET 
+	    TIME_VIEWS = TIME_VIEWS+1
+	    WHERE
+	        TIME_LEC_BO_NO = #{timeLecBoNo}
+	 </update>
+	 <insert id="lecBoaAddAjax">
+		 <selectKey resultType="String" order="BEFORE" keyProperty="timeLecBoNo">
+		 	SELECT NVL(MAX(TO_NUMBER(TIME_LEC_BO_NO))+1,0) FROM TIME_LECUTRE_BOAST
+		 </selectKey>
+		INSERT INTO time_lecutre_boast (
+		    time_lec_bo_no
+		    , st_no
+		    , time_lec_bo_name
+		    , time_lec_bo_con
+		    , time_views
+		    , time_lec_date
+		    , time_lec_like
+		    , time_lec_upd_date
+		) VALUES (
+		    #{timeLecBoNo}
+		  , #{stNo}
+		  , #{timeLecBoName}
+		  , #{timeLecBoCon}
+		  , 0
+		  , SYSDATE
+		  , 0
+		  , SYSDATE
+		)
+	 </insert>
+	 <select id="mostLikeList" resultMap="timeLecutreBoastVOMap">
+	 SELECT T.*
+		FROM (
+		    SELECT 
+		        ROW_NUMBER() OVER (ORDER BY TIME_LEC_LIKE DESC) AS RNUM,
+		        TIME_LEC_BO_NO
+		        , TIME_LEC_LIKE
+		        , ST_NO
+		        , TIME_LEC_BO_NAME
+		        , TIME_LEC_BO_CON
+		        , TIME_VIEWS
+		        , TIME_LEC_DATE
+		        , TIME_LEC_ATT_FILE
+		        , TIME_LEC_UPD_DATE
+		        , TIME_LEC_DEL_YN
+		    FROM TIME_LECUTRE_BOAST 
+		    WHERE TIME_LEC_DEL_YN = 'N' 
+		) T
+		WHERE T.RNUM BETWEEN 1 AND 5
+	 
+	 </select>
+	 <select id="lecBoaDetail" parameterType="hashMap" resultMap="timeLecutreBoastVOMap">
+		SELECT 
+            A.TIME_LEC_BO_NO,
+            A.ST_NO,
+            A.TIME_LEC_BO_NAME,
+            A.TIME_LEC_BO_CON,
+            A.TIME_VIEWS,
+            TO_CHAR(A.TIME_LEC_DATE, 'YYYY-MM-DD') AS TIME_LEC_DATE,
+            (SELECT NVL(COUNT(*), 0) FROM TIME_LECTURE_RECOM WHERE TIME_LEC_BO_NO = A.TIME_LEC_BO_NO) AS TIME_LEC_LIKE,
+            TO_CHAR(A.TIME_LEC_UPD_DATE, 'YYYY-MM-DD') AS TIME_LEC_UPD_DATE,
+            A.TIME_LEC_DEL_YN,
+            B.TIME_BOA_COMM_NO,
+            B.ST_NO AS COMM_ST_NO,
+            TO_CHAR(B.TIME_BOA_COMM_DATE, 'YYYY-MM-DD HH24:MI') AS TIME_BOA_COMM_DATE,
+            B.TIME_BOA_COMM_CON,
+            B.TIME_BOA_COMM_YN,
+            C.COMMENT_COUNT,
+            D.TIME_NO,
+            D.ST_NO AS Recom_ST_NO,
+            D.TIME_LEC_BO_NO AS D_TIME_LEC_BO_NO,
+            E.USER_NAME
+        FROM TIME_LECUTRE_BOAST A
+        LEFT JOIN TIME_BOAST_COMM B 
+            ON A.TIME_LEC_BO_NO = B.TIME_LEC_BO_NO AND B.TIME_BOA_COMM_YN = 'N'
+        LEFT JOIN (
+            SELECT TIME_LEC_BO_NO, COUNT(*) AS COMMENT_COUNT
+            FROM TIME_BOAST_COMM 
+            WHERE TIME_BOA_COMM_YN = 'N'
+            GROUP BY TIME_LEC_BO_NO
+        ) C
+            ON A.TIME_LEC_BO_NO = C.TIME_LEC_BO_NO
+        LEFT JOIN TIME_LECTURE_RECOM D
+            ON A.TIME_LEC_BO_NO = D.TIME_LEC_BO_NO
+        LEFT JOIN USER_INFO E
+            ON A.ST_NO= E.USER_NO
+        WHERE A.TIME_LEC_BO_NO =#{timeLecBoNo}
+	 </select>
+	 <select id="likeList" parameterType="TimeLectureRecomVO" resultType="TimeLectureRecomVO">
+	 SELECT
+	    time_no
+	  , st_no
+	  , time_lec_bo_no
+	FROM
+	    time_lecture_recom
+	where 
+	    time_lec_bo_no=#{timeLecBoNo}
+	 </select>
+	 
+	 <update id="lecBoaDelete" parameterType="TimeLecutreBoastVO">
+		UPDATE time_lecutre_boast
+		SET
+		    time_lec_del_yn = 'Y'
+		WHERE
+		        time_lec_bo_no = #{timeLecBoNo}
+		    AND st_no = #{stNo}	 
+	 </update>
+	 <delete id="likeDelCnt" parameterType="TimeLectureRecomVO">
+		DELETE FROM time_lecture_recom
+		WHERE
+		        time_lec_bo_no = #{timeLecBoNo}
+		    AND st_no = #{stNo}	 
+	 </delete>
+	 <update id="boaLikeDelete" parameterType="TimeLectureRecomVO">
+	  UPDATE TIME_LECUTRE_BOAST
+	    SET 
+	    TIME_LEC_LIKE = TIME_LEC_LIKE-1
+	    WHERE
+	        TIME_LEC_BO_NO = #{timeLecBoNo}
+	 </update>
+	 <insert id="likeInsert" parameterType="TimeLectureRecomVO">
+	 <selectKey resultType="String" order="BEFORE" keyProperty="timeNo">
+	 	SELECT NVL(MAX(TO_NUMBER(TIME_NO))+1,'1') FROM TIME_LECTURE_RECOM
+	 </selectKey>
+		INSERT INTO time_lecture_recom (
+		    time_no
+		    , st_no
+		    , time_lec_bo_no
+		) VALUES (
+		    #{timeNo}
+		  , #{stNo}	 
+		  , #{timeLecBoNo}
+		  )
+	 </insert>
+	 <update id="boaLikeUpdate" parameterType="TimeLectureRecomVO">
+	  UPDATE TIME_LECUTRE_BOAST
+	    SET 
+	    TIME_LEC_LIKE = TIME_LEC_LIKE+1
+	    WHERE
+	        TIME_LEC_BO_NO = #{timeLecBoNo}
+	 </update>
+	 <select id="timeBoastComm" parameterType="TimeBoastCommVO" resultType="TimeBoastCommVO">
+		 SELECT
+		    time_boa_comm_no
+		  , st_no
+		  , time_lec_bo_no
+		  , time_boa_comm_date
+		  , time_boa_comm_con
+		  , time_boa_comm_yn
+		FROM
+		    time_boast_comm
+		WHERE 1=1
+		    AND TIME_LEC_BO_NO = #{timeLecBoNo}
+		    AND TIME_BOA_COMM_YN='N'
+		ORDER BY TIME_BOA_COMM_DATE
+	 </select>
+	 <insert id="timeBoastCommInsert" parameterType="TimeBoastCommVO">
+	 	<selectKey resultType="String" order="BEFORE" keyProperty="timeBoaCommNo" >
+	 		SELECT NVL(SUBSTR(MAX(TIME_BOA_COMM_NO),1,4)||TRIM(TO_CHAR(TO_NUMBER(SUBSTR(MAX(TIME_BOA_COMM_NO),5))+1,'000')),'COMM001')
+			FROM time_boast_comm
+	 	</selectKey>
+			INSERT INTO time_boast_comm (
+			    time_boa_comm_no
+			    , st_no
+			    , time_lec_bo_no
+			    , time_boa_comm_date
+			    , time_boa_comm_con
+			    , time_boa_comm_yn
+			) VALUES (
+			    #{timeBoaCommNo}
+			  , #{stNo}
+			  , #{timeLecBoNo}
+			  , SYSDATE
+			  , #{timeBoaCommCon}
+			  , 'N'
+			)	 
+	 </insert>
+	 <update id="timeBoastCommDelete" parameterType="TimeBoastCommVO">
+		UPDATE time_boast_comm
+		SET
+		    time_boa_comm_yn = 'Y'
+		WHERE
+		        time_boa_comm_no = #{timeBoaCommNo}
+		    AND st_no = #{stNo}
+		    AND time_lec_bo_no = #{timeLecBoNo}
+	 </update>
+	 <select id="updateMode" parameterType="TimeLecutreBoastVO" resultType="TimeLecutreBoastVO">
+		SELECT
+		    time_lec_bo_no
+		  , st_no
+		  , time_lec_bo_name
+		  , time_lec_bo_con
+		  , time_views
+		  , time_lec_date
+		  , time_lec_like
+		  , time_lec_att_file
+		  , time_lec_upd_date
+		  , time_lec_del_yn
+		FROM
+		    time_lecutre_boast
+		WHERE
+		time_lec_bo_no = #{timeLecBoNo}	 
+	 </select>
+	 <update id="lecBoaUpdate" parameterType="TimeLecutreBoastVO">
+		UPDATE TIME_LECUTRE_BOAST
+		SET 
+		    TIME_LEC_BO_NAME = #{timeLecBoName},
+		    TIME_LEC_BO_CON = #{timeLecBoCon},
+		    TIME_LEC_UPD_DATE = SYSDATE
+		WHERE 
+		    TIME_LEC_BO_NO = #{timeLecBoNo}
+		    AND ST_NO = #{stNo}
+	 </update>
+	 <select id="detailMode" parameterType="TimeLecutreBoastVO" resultType="TimeLecutreBoastVO">
+		SELECT
+		    time_lec_bo_no
+		  , st_no
+		  , time_lec_bo_name
+		  , time_lec_bo_con
+		  , time_views
+		  , time_lec_date
+		  , time_lec_like
+		  , time_lec_att_file
+		  , time_lec_upd_date
+		  , time_lec_del_yn
+		FROM
+		    time_lecutre_boast
+		WHERE 
+		time_lec_bo_no = #{timeLecBoNo}	 
+	 </select>
+	 <select id="declarationComDetCode" parameterType="String" resultType="ComDetCodeVO">
+		SELECT 
+			COM_DET_CODE, COM_DET_CODE_NAME, COM_DET_USE_YN, COM_CODE
+		FROM COM_DET_CODE 
+		WHERE COM_CODE = #{comCode}
+			AND COM_DET_USE_YN='Y'	 
+	 </select>
+	 <insert id="lecBoaDeclaration" parameterType="TimeDeclareVO">
+		 <selectKey resultType="String" order="BEFORE" keyProperty="timeDeno">
+		 	SELECT NVL(MAX(TO_NUMBER(TIME_DENO))+1,0) FROM TIME_DECLARE
+		 </selectKey>
+			INSERT INTO time_declare (
+			    time_deno
+			    , time_dereason
+			    , time_b_div
+			    , time_de_b_no
+			    , time_de_url
+			    , time_de_id
+			    , time_de_title
+			    , time_de_date
+			) VALUES (
+			    #{timeDeno}
+			  , #{timeDereason}
+			  , #{timeBDiv}
+			  , #{timeDeBNo}
+			  , #{timeDeUrl}
+			  , #{timeDeId}
+			  , #{timeDeTitle}
+			  , SYSDATE
+			)	 
+	 </insert>
+	 <select id="timeBoastCommDeclare" parameterType="TimeDeclareVO" resultType="TimeDeclareVO">
+		SELECT TIME_DENO, TIME_DEREASON, TIME_B_DIV, TIME_DE_B_NO, TIME_DE_URL, TIME_DE_ID, TIME_DE_TITLE, TIME_DE_DATE
+		FROM TIME_DECLARE
+		WHERE TIME_DE_ID =#{timeDeId}
+		   AND TIME_B_DIV =#{timeBDiv}
+		   	  
+	 </select>
+	 <!-- 관리자 권한 -->
+	 <select id="mostLikeListAdmin" resultMap="timeLecutreBoastVOMap">
+		SELECT * 
+		FROM (
+		    SELECT 
+		        ROW_NUMBER() OVER (ORDER BY to_number(TIME_LEC_LIKE) DESC) AS RNUM,
+		        T.TIME_LEC_BO_NO,
+		        T.ST_NO,
+		        T.TIME_LEC_BO_NAME,
+		        T.TIME_LEC_BO_CON,
+		        T.TIME_VIEWS,
+		        T.TIME_LEC_DATE,
+		        (SELECT NVL(COUNT(*), 0) FROM TIME_LECTURE_RECOM R WHERE R.TIME_LEC_BO_NO = T.TIME_LEC_BO_NO) AS TIME_LEC_LIKE,
+		        T.TIME_LEC_ATT_FILE,
+		        T.TIME_LEC_UPD_DATE,
+		        T.TIME_LEC_DEL_YN
+		    FROM TIME_LECUTRE_BOAST T
+		    where T.TIME_LEC_DEL_YN='N'
+		) T
+		WHERE T.RNUM BETWEEN 1 AND 5
+	 </select>
+	 <select id="getTotalLecBoaAdmin" parameterType="hashMap" resultType="int">
+	 SELECT NVL(COUNT(*),0) 
+	 	FROM TIME_LECUTRE_BOAST 
+	 	WHERE 1=1
+	 	<include refid="whereBoast"></include> 
+	 </select>
+	 <select id="lecutreBoastAdminAjax" parameterType="hashMap" resultMap="timeLecutreBoastVOMap">
+		SELECT 
+		    T.*
+		FROM (
+		    SELECT 
+		    ROW_NUMBER() OVER (ORDER BY TIME_LEC_DATE DESC) AS RNUM,
+		        A.TIME_LEC_BO_NO,
+		        A.ST_NO,
+		        A.TIME_LEC_BO_NAME,  
+		        A.TIME_LEC_BO_CON,
+		        A.TIME_VIEWS,
+		        TO_CHAR(A.TIME_LEC_DATE, 'YYYY-MM-DD') AS TIME_LEC_DATE,
+		        (SELECT NVL(COUNT(*), 0) FROM TIME_LECTURE_RECOM WHERE TIME_LEC_BO_NO = A.TIME_LEC_BO_NO) AS TIME_LEC_LIKE,
+		        A.TIME_LEC_ATT_FILE,
+		        TO_CHAR(A.TIME_LEC_UPD_DATE, 'YYYY-MM-DD') AS TIME_LEC_UPD_DATE,
+		        A.TIME_LEC_DEL_YN,
+		        B.ST_GENDER,
+		        B.ST_POSTNO,
+		        B.ST_ADDR,
+		        B.ST_ADDR_DET,
+		        B.ST_ACOUNT,
+		        B.ST_BANK,
+		        B.MILITARY_SERVICE,
+		        B.ST_EMAIL,
+		        B.PRO_CHA_NO,
+		        B.ADMISSION_DATE,
+		        B.ST_GRAD_DATE,
+		        B.DEPT_CODE,
+		        B.ST_GRADE,
+		        B.ST_SEMESTER,
+		        C.USER_NO,
+		        C.USER_NAME
+		    FROM TIME_LECUTRE_BOAST A
+		    JOIN STUDENT B ON A.ST_NO = B.ST_NO
+		    JOIN USER_INFO C ON A.ST_NO = C.USER_NO
+		    WHERE 1=1
+		    <include refid="whereBoast"></include>
+		  
+		)T
+		WHERE T.RNUM BETWEEN ((#{currentPage} * 10)-(10 - 1)) AND (#{currentPage} * 10)
+	 </select>
+	 
+	 <select id="timeBoastCommAdmin" parameterType="TimeBoastCommVO" resultType="TimeBoastCommVO">
+	  SELECT
+		    time_boa_comm_no
+		  , st_no
+		  , time_lec_bo_no
+		  , time_boa_comm_date
+		  , time_boa_comm_con
+		  , time_boa_comm_yn
+		FROM
+		    time_boast_comm
+		WHERE 1=1
+		    AND TIME_LEC_BO_NO = #{timeLecBoNo}
+		ORDER BY TIME_BOA_COMM_DATE
+	 </select>
+	 
+	 <update id="lecBoaAdminBlindUpdateY" parameterType="TimeLecutreBoastVO">
+		UPDATE time_lecutre_boast
+		SET
+		    time_lec_del_yn = 'Y'
+		WHERE
+		        time_lec_bo_no =#{timeLecBoNo}
+	 </update>
+	 <update id="lecBoaAdminCommBlindUpdateY" parameterType="TimeBoastCommVO">
+		UPDATE time_boast_comm
+		SET
+		    time_boa_comm_yn = 'Y'
+		WHERE
+		        time_boa_comm_no = #{timeBoaCommNo}	 
+	 
+	 </update>
+ <!--                            이수빈 end                                                                                   -->
+ 
+ 
+ 		<!-- /////////////////////////////////// 유진 구역 /////////////////////////////////// -->
+ 		
+		<sql id="whereExc">
+			<if test="keyword!=null and keyword!=''">
+				<choose>
+					<when test="queGubun == 1">
+						AND (T.TIME_EX_NAME LIKE '%' || #{keyword} || '%')
+					</when>
+					<when test="queGubun == 2">
+						AND (U.USER_NAME LIKE '%' || #{keyword} || '%')
+					</when>
+					<when test="queGubun == 3">
+						AND (T.TIME_EX_DATE LIKE '%' || #{keyword} || '%')
+					</when>
+				</choose>		
+			</if>
+		</sql>
+ 		
+ 		<!-- 강의 거래 게시글 전체 행수 -->
+		<select id="getTotalExc" parameterType="hashMap" resultType="int">
+			SELECT COUNT(*)
+			FROM TIME_EXCHANGE_BOARD T
+			    INNER JOIN USER_INFO U ON(T.ST_NO = U.USER_NO)
+			WHERE T.TIME_EX_DEL_YN = 'N'
+			<include refid="whereExc"></include>
+		</select>
+		
+ 		<!-- 강의 거래 게시글 전체 행수 (관리자) -->
+		<select id="getTotalExcAdmin" parameterType="hashMap" resultType="int">
+			SELECT COUNT(*)
+			FROM TIME_EXCHANGE_BOARD T
+			    INNER JOIN USER_INFO U ON(T.ST_NO = U.USER_NO)
+			WHERE 1 = 1
+			<include refid="whereExc"></include>
+		</select>
+		
+		<!-- 학생 강의 거래 목록 (양도) -->
+		<select id="exchaBoard" resultMap="exchaBoardListMap" parameterType="hashMap">
+			SELECT Y.* FROM ( SELECT  ROWNUM RN, T.*
+			    FROM
+			    (
+			        SELECT T.TIME_EX_B_NO
+			            , T.ST_NO
+			            , U.USER_NAME
+			            , T.TIME_EX_NAME
+			            , T.TIME_EX_CON
+			            , T.TIME_EX_VIEWS
+			            , TO_CHAR(T.TIME_EX_DATE, 'YYYY-MM-DD') TIME_EX_DATE
+			            , TO_CHAR(T.TIME_EX_DATE, 'HH24:MI') TIME_EX_DATE_TIME
+			            , T.TIME_EX_STAT
+			        FROM TIME_EXCHANGE_BOARD T
+			            INNER JOIN USER_INFO U ON(T.ST_NO = U.USER_NO)
+			        WHERE T.TIME_EX_DEL_YN = 'N'
+			            AND T.TIME_EX_DIV = '양도'
+			            <include refid="whereExc"></include>
+			        ORDER BY T.TIME_EX_DATE DESC
+			    ) T ) Y
+			WHERE Y.RN BETWEEN ((#{currentPage} * 6)-(6 - 1)) AND (#{currentPage} * 6)
+		</select>
+		
+		<!-- 학생 강의 거래 목록 (구함) -->
+		<select id="exchaBoardWan" resultMap="exchaBoardListMap" parameterType="hashMap">
+			SELECT Y.* FROM ( SELECT  ROWNUM RN, T.*
+			    FROM
+			    (
+			        SELECT T.TIME_EX_B_NO
+			            , T.ST_NO
+			            , U.USER_NAME
+			            , T.TIME_EX_NAME
+			            , T.TIME_EX_CON
+			            , T.TIME_EX_VIEWS
+			            , TO_CHAR(T.TIME_EX_DATE, 'YYYY-MM-DD') TIME_EX_DATE
+			            , TO_CHAR(T.TIME_EX_DATE, 'HH24:MI') TIME_EX_DATE_TIME
+			            , T.TIME_EX_STAT
+			        FROM TIME_EXCHANGE_BOARD T
+			            INNER JOIN USER_INFO U ON(T.ST_NO = U.USER_NO)
+			        WHERE T.TIME_EX_DEL_YN = 'N'
+			            AND T.TIME_EX_DIV = '구함'
+			            <include refid="whereExc"></include>
+			        ORDER BY T.TIME_EX_DATE DESC
+			    ) T ) Y
+			WHERE Y.RN BETWEEN ((#{currentPage} * 6)-(6 - 1)) AND (#{currentPage} * 6)
+		</select>
+		
+		
+		<!-- 강의 거래 목록 (양도) -->
+		<select id="exchaBoardAdmin" resultMap="exchaBoardListMap" parameterType="hashMap">
+			SELECT Y.* FROM ( SELECT  ROWNUM RN, T.*
+			    FROM
+			    (
+			        SELECT T.TIME_EX_B_NO
+			            , T.ST_NO
+			            , U.USER_NAME
+			            , T.TIME_EX_NAME
+			            , T.TIME_EX_CON
+			            , T.TIME_EX_VIEWS
+			            , TO_CHAR(T.TIME_EX_DATE, 'YYYY-MM-DD') TIME_EX_DATE
+			            , TO_CHAR(T.TIME_EX_DATE, 'HH24:MI') TIME_EX_DATE_TIME
+			            , T.TIME_EX_STAT
+			            , T.TIME_EX_DEL_YN
+			        FROM TIME_EXCHANGE_BOARD T
+			            INNER JOIN USER_INFO U ON(T.ST_NO = U.USER_NO)
+			        WHERE T.TIME_EX_DIV = '양도'
+			            <include refid="whereExc"></include>
+			        ORDER BY T.TIME_EX_DATE DESC
+			    ) T ) Y
+			WHERE Y.RN BETWEEN ((#{currentPage} * 6)-(6 - 1)) AND (#{currentPage} * 6)
+		</select>
+		
+		<!-- 강의 거래 목록 (구함) -->
+		<select id="exchaBoardWanAdmin" resultMap="exchaBoardListMap" parameterType="hashMap">
+			SELECT Y.* FROM ( SELECT  ROWNUM RN, T.*
+			    FROM
+			    (
+			        SELECT T.TIME_EX_B_NO
+			            , T.ST_NO
+			            , U.USER_NAME
+			            , T.TIME_EX_NAME
+			            , T.TIME_EX_CON
+			            , T.TIME_EX_VIEWS
+			            , TO_CHAR(T.TIME_EX_DATE, 'YYYY-MM-DD') TIME_EX_DATE
+			            , TO_CHAR(T.TIME_EX_DATE, 'HH24:MI') TIME_EX_DATE_TIME
+			            , T.TIME_EX_STAT
+			            , T.TIME_EX_DEL_YN
+			        FROM TIME_EXCHANGE_BOARD T
+			            INNER JOIN USER_INFO U ON(T.ST_NO = U.USER_NO)
+			        WHERE T.TIME_EX_DIV = '구함'
+			            <include refid="whereExc"></include>
+			        ORDER BY T.TIME_EX_DATE DESC
+			    ) T ) Y
+			WHERE Y.RN BETWEEN ((#{currentPage} * 6)-(6 - 1)) AND (#{currentPage} * 6)
+		</select>
+		
+		<resultMap type="timeExchangeBoardVO" id="exchaBoardListMap">
+			<result property="rn" column="RN"/>
+			<result property="timeExBNo" column="TIME_EX_B_NO"/>
+			<result property="timeExDiv" column="TIME_EX_DIV"/>
+			<result property="stNo" column="ST_NO"/>
+			<result property="timeExName" column="TIME_EX_NAME"/>
+			<result property="timeExCon" column="TIME_EX_CON"/>
+			<result property="timeExViews" column="TIME_EX_VIEWS"/>
+			<result property="timeExDate" column="TIME_EX_DATE"/>
+			<result property="timeExDateTime" column="TIME_EX_DATE_TIME"/>
+			<result property="timeExStat" column="TIME_EX_STAT"/>
+			<result property="timeExDelYn" column="TIME_EX_DEL_YN"/>
+			<result property="timeExUpdDate" column="TIME_EX_UPD_DATE"/>
+			<result property="timeExUpdDateTime" column="TIME_EX_UPD_DATE_TIME"/>
+			
+			<collection property="userInfoVOList" resultMap="userInfoVOMap"></collection>
+		</resultMap>
+		
+		<!-- 학생 강의 거래 상세 -->
+		<select id="excBoaDetail" parameterType="String" resultMap="exchaBoardListMap">
+			SELECT T.TIME_EX_NAME
+				, T.TIME_EX_CON
+			    , TO_CHAR(T.TIME_EX_DATE, 'YYYY-MM-DD') TIME_EX_DATE
+			    , TO_CHAR(T.TIME_EX_UPD_DATE, 'YYYY-MM-DD') TIME_EX_UPD_DATE
+			    , U.USER_NAME
+			    , U.USER_NO
+			    , T.TIME_EX_DIV
+			    , T.TIME_EX_STAT
+			FROM TIME_EXCHANGE_BOARD T
+			    INNER JOIN USER_INFO U ON(T.ST_NO = U.USER_NO)
+			WHERE TIME_EX_B_NO = #{timeExBNo}
+		</select>
+		
+		<!-- 강의 거래 상세 -->
+		<select id="excBoaDetailAdmin" parameterType="String" resultMap="exchaBoardListMap">
+			SELECT T.TIME_EX_NAME
+				, T.TIME_EX_CON 
+				, TIME_EX_B_NO
+			    , TO_CHAR(T.TIME_EX_DATE, 'YYYY-MM-DD') TIME_EX_DATE
+			    , TO_CHAR(T.TIME_EX_UPD_DATE, 'YYYY-MM-DD') TIME_EX_UPD_DATE
+			    , U.USER_NAME
+			    , T.TIME_EX_DIV
+			    , T.TIME_EX_STAT
+			FROM TIME_EXCHANGE_BOARD T
+			    INNER JOIN USER_INFO U ON(T.ST_NO = U.USER_NO)
+			WHERE TIME_EX_B_NO = #{timeExBNo}
+		</select>
+		
+		<!-- 관리자 블라인드 처리 -->
+		<update id="deleteAdminAjax" parameterType="String">
+			UPDATE TIME_EXCHANGE_BOARD 
+			SET TIME_EX_DEL_YN = 'Y'
+			WHERE TIME_EX_B_NO = #{timeExBNo}
+		</update>
+</mapper>
